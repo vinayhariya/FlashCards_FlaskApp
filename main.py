@@ -11,17 +11,19 @@ def create_app():
     db.init_app(app)
 
     api = Api(app)
-    app.app_context().push()
 
     with app.app_context():
         if not database_exists(app.config["SQLALCHEMY_DATABASE_URI"]):
             db.create_all()
         pass
 
+    app.app_context().push()
     return app, api
 
 
 app, api = create_app()
+
+from application.controllers import *
 
 if __name__ == "__main__":
     app.run(port=8000)
