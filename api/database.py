@@ -5,7 +5,7 @@
 import os
 from flask_sqlalchemy import SQLAlchemy
 
-db = SQLAlchemy()
+db = SQLAlchemy()  # Control the SQLAlchemy integration
 
 base_dir = os.path.abspath(os.path.dirname(__file__))
 parent_dir = os.path.abspath(os.path.join(base_dir, os.pardir))

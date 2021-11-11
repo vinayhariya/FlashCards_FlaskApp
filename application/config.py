@@ -16,7 +16,8 @@ class Config:
 # above copied from Week 6 screencast (TODO remove in final submimssion)
 
 # class LocalDevelopmentConfig(Config):
-class LocalDevelopmentConfig:
+class LocalDevelopmentConfig:  # used for configuration of Flask app
+
     SQLITE_DB_DIR = SQLITE_DB_DIR
     SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI
 

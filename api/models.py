@@ -12,7 +12,6 @@ class User(db.Model):
     last_name = db.Column(db.String(50), nullable=False)
 
     decks = db.relationship("Deck")
-    pass
 
 
 class Deck(db.Model):
@@ -24,7 +23,6 @@ class Deck(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
 
     cards = db.relationship("Card")
-    pass
 
 
 class Card(db.Model):
@@ -34,7 +32,6 @@ class Card(db.Model):
     front = db.Column(db.String(255), nullable=False)
     back = db.Column(db.String(255), nullable=False)
     deck_id = db.Column(db.Integer, db.ForeignKey("decks.deck_id"), nullable=False)
-    pass
 
 
 class SolvingDeck(db.Model):
@@ -47,7 +44,6 @@ class SolvingDeck(db.Model):
     total_score = db.Column(db.Integer, nullable=True)
 
     card_unique_details = db.relationship("PerCard")
-    pass
 
 
 class PerCard(db.Model):
@@ -69,7 +65,6 @@ class Difficulty(db.Model):
 
     difficulty_id = db.Column(db.String(2), primary_key=True)
     difficulty_desc = db.Column(db.String(15), unique=True, nullable=False)
-    pass
 
 
 class Scoring(db.Model):
@@ -77,7 +72,3 @@ class Scoring(db.Model):
 
     score_id = db.Column(db.Integer, primary_key=True)
     score_desc = db.Column(db.String(15), unique=True, nullable=False)
-    pass
-
-
-# db.create_all()
