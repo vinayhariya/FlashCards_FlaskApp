@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_restful import Api
 from sqlalchemy_utils import database_exists
+from api.api import UserAPI
 
 from application.config import LocalDevelopmentConfig  # for configuration of Flask App
 from api.database import db  # importing SQLAlchemy instance
@@ -29,6 +30,8 @@ def create_app():
 app, api = create_app()
 
 from application.controllers import *  # importing all the route controllers
+
+api.add_resource(UserAPI, "/api/user", "/api/user/<string:username>")
 
 if __name__ == "__main__":
     app.run(port=8000)  # running the app at port 8000

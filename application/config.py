@@ -20,6 +20,7 @@ class LocalDevelopmentConfig:  # used for configuration of Flask app
 
     SQLITE_DB_DIR = SQLITE_DB_DIR
     SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     STATIC_FOLDER = os.path.join(parent_dir, "application\\static")
     TEMPLATE_FOLDER = os.path.join(parent_dir, "application\\templates")
