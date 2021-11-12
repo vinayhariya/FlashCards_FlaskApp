@@ -23,5 +23,6 @@ class LocalDevelopmentConfig:  # used for configuration of Flask app
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     STATIC_FOLDER = os.path.join(parent_dir, "application\\static")
-    TEMPLATE_FOLDER = os.path.join(parent_dir, "application\\templates")
+    # TEMPLATE_FOLDER = os.path.join(parent_dir, "application\\templates")
     DEBUG = True
+    SECRET_KEY = "secretkeyishere"

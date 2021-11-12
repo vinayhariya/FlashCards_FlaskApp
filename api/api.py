@@ -10,8 +10,8 @@ create_user_parser.add_argument("password")
 
 
 class UserAPI(Resource):
-    def get(self, username):
-        user = User.query.filter(User.username == username).first()
+    def get(self, user_id):
+        user = User.query.filter(User.user_id == user_id).first()
 
         if user is None:
             return {"error": "User with username does not exist"}, 306

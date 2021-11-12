@@ -1,5 +1,7 @@
 Flask
+Flask-Login
 Flask-SQLAlchemy
 Flask-RESTful
 black
+requests
 sqlalchemy-utils
