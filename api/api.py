@@ -22,7 +22,7 @@ class UserAPI(Resource):
             "user_id": user.user_id,
             "username": user.username,
             "email": user.email,
-            "api_key": user.api,
+            "api_key": user.api_key,
         }
 
     def post(self):
