@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template
 from flask_login import login_required, current_user
 
-main_cont = Blueprint("main_cont", __name__, template_folder="templates")
+main_cont = Blueprint("main_cont", __name__, template_folder="../templates")
 
 
 @main_cont.route("/")

@@ -2,11 +2,13 @@ from flask import Flask
 from flask_restful import Api
 from flask_login import LoginManager
 from sqlalchemy_utils import database_exists
+import sys
 
 from api.api import UserAPI
 from api.database import db  # importing SQLAlchemy instance
 from api.models import User
-from application.config import LocalDevelopmentConfig  # for configuration of Flask App
+# for configuration of Flask App
+from application.config import LocalDevelopmentConfig
 
 
 def create_app():
@@ -24,7 +26,8 @@ def create_app():
             db.create_all()
     # above code creates the database if it does not exist
 
-    app.app_context().push()  # creating and pushing context so that it can be used in other files
+    # creating and pushing context so that it can be used in other files
+    app.app_context().push()
 
     login_manager = LoginManager()
     login_manager.login_view = "auth.login"
@@ -36,8 +39,8 @@ def create_app():
             int(user_id)
         )  # used for maintaining the current user of the app
 
-    from application.auth import auth as auth_blueprint
-    from application.main_controllers import main_cont as main_blueprint
+    from application.controllers.auth_controllers import auth as auth_blueprint
+    from application.controllers.main_controllers import main_cont as main_blueprint
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(main_blueprint)

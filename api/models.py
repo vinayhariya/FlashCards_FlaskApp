@@ -26,7 +26,8 @@ class Deck(db.Model):
     deck_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     deckname = db.Column(db.String(25), nullable=False, unique=True)
     public = db.Column(db.Boolean, nullable=False, default=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey(
+        "users.user_id"), nullable=False)
 
     cards = db.relationship("Card")
 
@@ -37,15 +38,18 @@ class Card(db.Model):
     card_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     front = db.Column(db.String(255), nullable=False)
     back = db.Column(db.String(255), nullable=False)
-    deck_id = db.Column(db.Integer, db.ForeignKey("decks.deck_id"), nullable=False)
+    deck_id = db.Column(db.Integer, db.ForeignKey(
+        "decks.deck_id"), nullable=False)
 
 
 class SolvingDeck(db.Model):
     __tablename__ = "solving_deck"
 
     solve_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
-    deck_id = db.Column(db.Integer, db.ForeignKey("decks.deck_id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey(
+        "users.user_id"), nullable=False)
+    deck_id = db.Column(db.Integer, db.ForeignKey(
+        "decks.deck_id"), nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False)
     total_score = db.Column(db.Integer, nullable=True)
 
@@ -59,11 +63,13 @@ class PerCard(db.Model):
     solve_id = db.Column(
         db.Integer, db.ForeignKey("solving_deck.solve_id"), nullable=False
     )
-    card_id = db.Column(db.Integer, db.ForeignKey("cards.card_id"), nullable=False)
+    card_id = db.Column(db.Integer, db.ForeignKey(
+        "cards.card_id"), nullable=False)
     difficulty = db.Column(
         db.String(2), db.ForeignKey("difficulty.difficulty_id"), nullable=False
     )
-    score = db.Column(db.Integer, db.ForeignKey("scoring.score_id"), nullable=False)
+    score = db.Column(db.Integer, db.ForeignKey(
+        "scoring.score_id"), nullable=False)
 
 
 class Difficulty(db.Model):

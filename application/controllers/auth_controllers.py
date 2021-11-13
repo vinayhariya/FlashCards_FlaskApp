@@ -4,7 +4,8 @@ import requests
 
 from api.models import User
 
-auth = Blueprint("auth", __name__, template_folder="templates")
+auth = Blueprint("auth", __name__,
+                 template_folder="../templates/auth_templates")
 
 
 @auth.route("/login", methods=["GET", "POST"])
