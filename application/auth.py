@@ -22,8 +22,6 @@ def login():
 
         res = res.json()
 
-        print(res)
-
         if res.get("status", None):  # logged in successfully
             user = User.query.filter(User.username == username).first()
             login_user(user, remember=True)
@@ -56,8 +54,6 @@ def signup():
         res = requests.post("http://127.0.0.1:8000/api/user", data)
 
         res = res.json()
-
-        print(res)
 
         if res.get("error_code", None):
             flash("Account address already exists")

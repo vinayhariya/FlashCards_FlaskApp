@@ -2,6 +2,6 @@ Flask
 Flask-Login
 Flask-SQLAlchemy
 Flask-RESTful
-black
+autopep8
 requests
 sqlalchemy-utils

@@ -2,6 +2,7 @@ from flask_restful import Resource, reqparse
 from api.models import User
 from api.database import db
 from api.validation import BusinessValidationError
+import secrets
 
 entry_user_parser = reqparse.RequestParser()
 entry_user_parser.add_argument("username")
@@ -21,6 +22,7 @@ class UserAPI(Resource):
             "user_id": user.user_id,
             "username": user.username,
             "email": user.email,
+            "api_key": user.api,
         }
 
     def post(self):
@@ -63,7 +65,14 @@ class UserAPI(Resource):
                     status_code=401, error_code="else", error_message="duplicate user"
                 )
 
-            new_user = User(username=username, email=email, password=password)
+            api_key = secrets.token_urlsafe(16)
+
+            while User.query.filter(User.api_key == api_key).first():
+                api_key = secrets.token_urlsafe(16)
+
+            new_user = User(
+                username=username, email=email, password=password, api_key=api_key
+            )
             db.session.add(new_user)
             db.session.commit()
 
