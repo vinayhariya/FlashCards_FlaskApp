@@ -3,10 +3,11 @@ from api.models import User
 from api.database import db
 from api.validation import BusinessValidationError
 
-create_user_parser = reqparse.RequestParser()
-create_user_parser.add_argument("username")
-create_user_parser.add_argument("email")
-create_user_parser.add_argument("password")
+entry_user_parser = reqparse.RequestParser()
+entry_user_parser.add_argument("username")
+entry_user_parser.add_argument("email")
+entry_user_parser.add_argument("password")
+entry_user_parser.add_argument("new")
 
 
 class UserAPI(Resource):
@@ -14,7 +15,7 @@ class UserAPI(Resource):
         user = User.query.filter(User.user_id == user_id).first()
 
         if user is None:
-            return {"error": "User with username does not exist"}, 306
+            return {"error": "User with username does not exist"}, 404
 
         return {
             "user_id": user.user_id,
@@ -23,48 +24,79 @@ class UserAPI(Resource):
         }
 
     def post(self):
-        args = create_user_parser.parse_args()
-        username = args.get("username", None)
-        email = args.get("email", None)
-        password = args.get("password", None)
+        args = entry_user_parser.parse_args()
 
-        if username is None:
-            raise BusinessValidationError(
-                status_code=400,
-                error_code="something",
-                error_message="username is required",
-            )
+        username = args["username"]
+        password = args["password"]
 
-        if email is None:
-            raise BusinessValidationError(
-                status_code=400,
-                error_code="something",
-                error_message="email is required",
-            )
+        if args["new"] == str(True):  # new user trying to get created
 
-        if password is None:
-            raise BusinessValidationError(
-                status_code=400,
-                error_code="something",
-                error_message="password is required",
-            )
+            email = args["email"]
 
-        user = User.query.filter(
-            (User.username == username) | (User.email == email)
-        ).first()
+            if username is None:
+                raise BusinessValidationError(
+                    status_code=400,
+                    error_code="something",
+                    error_message="username is required",
+                )
 
-        if user:
-            raise BusinessValidationError(
-                status_code=401, error_code="else", error_message="duplicate user"
-            )
+            if email is None:
+                raise BusinessValidationError(
+                    status_code=400,
+                    error_code="something",
+                    error_message="email is required",
+                )
 
-        new_user = User(username=username, email=email, password=password)
-        db.session.add(new_user)
-        db.session.commit()
+            if password is None:
+                raise BusinessValidationError(
+                    status_code=400,
+                    error_code="something",
+                    error_message="password is required",
+                )
 
-        return {
-            "user_id": new_user.user_id,
-            "username": new_user.username,
-            "email": new_user.email,
-            "password": new_user.password,
-        }
+            user = User.query.filter(
+                (User.username == username) | (User.email == email)
+            ).first()
+
+            if user:
+                raise BusinessValidationError(
+                    status_code=401, error_code="else", error_message="duplicate user"
+                )
+
+            new_user = User(username=username, email=email, password=password)
+            db.session.add(new_user)
+            db.session.commit()
+
+            return {
+                "user_id": new_user.user_id,
+                "username": new_user.username,
+                "email": new_user.email,
+                "password": new_user.password,
+            }
+        else:  # user trying to log in
+            if username is None:
+                raise BusinessValidationError(
+                    status_code=400,
+                    error_code="something",
+                    error_message="username is required",
+                )
+
+            if password is None:
+                raise BusinessValidationError(
+                    status_code=400,
+                    error_code="something",
+                    error_message="password is required",
+                )
+
+            user = User.query.filter(
+                (User.username == username) & (User.password == password)
+            ).first()
+
+            if user:
+                return {"status": 200, "logged_in": True}
+            else:
+                raise BusinessValidationError(
+                    status_code=401,
+                    error_code="else",
+                    error_message="login error, details do not match",
+                )

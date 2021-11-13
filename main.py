@@ -3,10 +3,10 @@ from flask_restful import Api
 from flask_login import LoginManager
 from sqlalchemy_utils import database_exists
 
-from application.config import LocalDevelopmentConfig  # for configuration of Flask App
 from api.api import UserAPI
 from api.database import db  # importing SQLAlchemy instance
 from api.models import User
+from application.config import LocalDevelopmentConfig  # for configuration of Flask App
 
 
 def create_app():
@@ -22,7 +22,6 @@ def create_app():
     with app.app_context():
         if not database_exists(app.config["SQLALCHEMY_DATABASE_URI"]):
             db.create_all()
-
     # above code creates the database if it does not exist
 
     app.app_context().push()  # creating and pushing context so that it can be used in other files
