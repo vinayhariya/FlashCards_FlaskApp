@@ -2,9 +2,8 @@ from flask import Flask
 from flask_restful import Api
 from flask_login import LoginManager
 from sqlalchemy_utils import database_exists
-import sys
 
-from api.api import UserAPI
+from api.api import UserAPI, UserDeckList
 from api.database import db  # importing SQLAlchemy instance
 from api.models import User
 # for configuration of Flask App
@@ -51,6 +50,8 @@ def create_app():
 app, api = create_app()
 
 api.add_resource(UserAPI, "/api/user", "/api/user/<int:user_id>")
+api.add_resource(
+    UserDeckList, "/api/decks/add", "/api/<string:api_key>/user=<int:user_id>/decks")
 
 if __name__ == "__main__":
     app.run(port=8000)  # running the app at port 8000

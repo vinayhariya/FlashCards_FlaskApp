@@ -1,3 +1,4 @@
+from sqlalchemy.orm import backref
 from .database import db
 from flask_login import UserMixin
 
@@ -17,19 +18,25 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(50), nullable=False)
     api_key = db.Column(db.String(16), nullable=False)
 
-    decks = db.relationship("Deck")
+    db.relationship("Deck")
 
 
 class Deck(db.Model):
     __tablename__ = "decks"
 
     deck_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    deckname = db.Column(db.String(25), nullable=False, unique=True)
+    deckname = db.Column(db.String(25), nullable=False)
     public = db.Column(db.Boolean, nullable=False, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey(
         "users.user_id"), nullable=False)
 
-    cards = db.relationship("Card")
+    db.relationship("Card")
+
+    user = db.relationship("User", backref=backref(
+        "decks", cascade="all,delete"))
+
+    def no_of_cards(self):
+        return len(self.cards)
 
 
 class Card(db.Model):
@@ -40,6 +47,9 @@ class Card(db.Model):
     back = db.Column(db.String(255), nullable=False)
     deck_id = db.Column(db.Integer, db.ForeignKey(
         "decks.deck_id"), nullable=False)
+
+    deck = db.relationship("Deck", backref=backref(
+        "cards", cascade="all,delete"))
 
 
 class SolvingDeck(db.Model):

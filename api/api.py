@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse
-from api.models import User
+from api.models import Deck, User
 from api.database import db
 from api.validation import BusinessValidationError
 import secrets
@@ -9,6 +9,13 @@ entry_user_parser.add_argument("username")
 entry_user_parser.add_argument("email")
 entry_user_parser.add_argument("password")
 entry_user_parser.add_argument("new")
+
+
+deck_creation_parser = reqparse.RequestParser()
+deck_creation_parser.add_argument("user_id")
+deck_creation_parser.add_argument("api_key")
+deck_creation_parser.add_argument("deckname")
+deck_creation_parser.add_argument("public"),
 
 
 class UserAPI(Resource):
@@ -109,3 +116,59 @@ class UserAPI(Resource):
                     error_code="else",
                     error_message="login error, details do not match",
                 )
+
+    def delete(self):
+        d = User.query.filter(User.user_id == 1).first()
+        db.session.delete(d)
+        db.session.commit()
+        pass
+
+
+class UserDeckList(Resource):
+
+    def get(self, user_id, api_key):
+
+        user = User.query.filter(
+            (User.user_id == user_id) & (User.api_key == api_key)).first()
+
+        if user is None:
+            return {"error": "User with username does not exist"}, 404
+
+        deck_list = [{'deck_id': deck.deck_id, 'deck_name': deck.deckname,
+                      'public': deck.public, 'no_of_cards': deck.no_of_cards()} for deck in user.decks]
+
+        return {"decks": deck_list}
+
+    def post(self):
+        args = deck_creation_parser.parse_args()
+
+        user_id = args["user_id"]
+        api_key = args["api_key"]
+        deckname = args["deckname"]
+        public = args["public"]
+
+        user = User.query.filter(
+            (User.user_id == user_id) & (User.api_key == api_key)).first()
+
+        if user is None:
+            return {"error": "User with username does not exist"}, 404
+
+        deck_present = Deck.query.filter(
+            (Deck.user_id == user_id) & (Deck.deckname == deckname)).first()
+
+        if deck_present:
+            print('Present')
+        else:
+            print('Not present')
+            new_deck = Deck(user_id=user_id, deckname=deckname, public=bool(public))
+            db.session.add(new_deck)
+            db.session.commit()
+            print('Deck commited properly')
+
+        return {'sat': 'hi'}
+
+    def delete(self):
+        d = Deck.query.filter(Deck.deck_id == 1).first()
+        db.session.delete(d)
+        db.session.commit()
+        pass
