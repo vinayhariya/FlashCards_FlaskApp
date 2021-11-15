@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse
-from api.models import Deck, User
+from api.models import Card, Deck, User
 from api.database import db
 from api.validation import BusinessValidationError
 import secrets
@@ -15,7 +15,15 @@ deck_creation_parser = reqparse.RequestParser()
 deck_creation_parser.add_argument("user_id")
 deck_creation_parser.add_argument("api_key")
 deck_creation_parser.add_argument("deckname")
-deck_creation_parser.add_argument("public"),
+deck_creation_parser.add_argument("public")
+
+card_creation_parser = reqparse.RequestParser()
+card_creation_parser.add_argument("user_id")
+card_creation_parser.add_argument("api_key")
+card_creation_parser.add_argument("deck_id")
+card_creation_parser.add_argument("card_id")
+card_creation_parser.add_argument("front")
+card_creation_parser.add_argument("back")
 
 
 class UserAPI(Resource):
@@ -117,14 +125,14 @@ class UserAPI(Resource):
                     error_message="login error, details do not match",
                 )
 
-    def delete(self):
-        d = User.query.filter(User.user_id == 1).first()
-        db.session.delete(d)
-        db.session.commit()
-        pass
+    # def delete(self):
+    #     d = User.query.filter(User.user_id == 1).first()
+    #     db.session.delete(d)
+    #     db.session.commit()
+    #     pass
 
 
-class UserDeckList(Resource):
+class UserOwnDeckList(Resource):
 
     def get(self, user_id, api_key):
 
@@ -160,7 +168,8 @@ class UserDeckList(Resource):
             print('Present')
         else:
             print('Not present')
-            new_deck = Deck(user_id=user_id, deckname=deckname, public=bool(public))
+            new_deck = Deck(user_id=user_id, deckname=deckname,
+                            public=bool(public))
             db.session.add(new_deck)
             db.session.commit()
             print('Deck commited properly')
@@ -168,7 +177,75 @@ class UserDeckList(Resource):
         return {'sat': 'hi'}
 
     def delete(self):
+        # TODO make it dynamic
         d = Deck.query.filter(Deck.deck_id == 1).first()
         db.session.delete(d)
+        db.session.commit()
+        pass
+
+
+class UserOwnDeckCards(Resource):
+
+    def get(self, user_id, api_key, deck_id):
+
+        user = User.query.filter(
+            (User.user_id == user_id) & (User.api_key == api_key)).first()
+
+        if user is None:
+            return {"error": "User with username does not exist"}, 404
+
+        deck = Deck.query.filter(
+            (Deck.deck_id == deck_id) & (Deck.user_id == user_id)).first()
+
+        if deck is None:
+            return {"error": "No such deck exists for this user"}
+
+        card_list = [{'card_id': card.card_id, 'front': card.front,
+                      'back': card.back} for card in deck.cards]
+
+        return {"deck_id": deck_id, 'no_of_cards': deck.no_of_cards(), "cards": card_list}
+
+    pass
+
+    def post(self):
+        args = card_creation_parser.parse_args()
+
+        user_id = args["user_id"]
+        api_key = args["api_key"]
+        deck_id = args["deck_id"]
+        front = args["front"]
+        back = args["back"]
+
+        new_card = Card(front=front, back=back, deck_id=deck_id)
+
+        db.session.add(new_card)
+        db.session.commit()
+        print('New Card added properly')
+        pass
+
+    def put(self):
+        args = card_creation_parser.parse_args()
+
+        user_id = args["user_id"]
+        api_key = args["api_key"]
+        deck_id = args["deck_id"]
+        card_id = args["card_id"]
+        front = args["front"]
+        back = args["back"]
+
+        u_card = Card.query.filter(
+            (Card.deck_id == deck_id) & (Card.card_id == card_id)).first()
+
+        if front:
+            u_card.front = front
+        if back:
+            u_card.back = back
+
+        db.session.add(u_card)
+        db.session.commit()
+
+    def delete(self):
+        c = Card.query.filter(Card.card_id == 1).first()
+        db.session.delete(c)
         db.session.commit()
         pass
