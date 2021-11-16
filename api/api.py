@@ -2,36 +2,18 @@ from flask_restful import Resource, reqparse
 from api.models import Card, Deck, User
 from api.database import db
 from api.validation import BusinessValidationError
+from api.custom_parsers import *
+from api.custom_check_functions import *
 import secrets
 
-entry_user_parser = reqparse.RequestParser()
-entry_user_parser.add_argument("username")
-entry_user_parser.add_argument("email")
-entry_user_parser.add_argument("password")
-entry_user_parser.add_argument("new")
 
+class UserLoginAPI(Resource):
 
-deck_creation_parser = reqparse.RequestParser()
-deck_creation_parser.add_argument("user_id")
-deck_creation_parser.add_argument("api_key")
-deck_creation_parser.add_argument("deckname")
-deck_creation_parser.add_argument("public")
-
-card_creation_parser = reqparse.RequestParser()
-card_creation_parser.add_argument("user_id")
-card_creation_parser.add_argument("api_key")
-card_creation_parser.add_argument("deck_id")
-card_creation_parser.add_argument("card_id")
-card_creation_parser.add_argument("front")
-card_creation_parser.add_argument("back")
-
-
-class UserAPI(Resource):
-    def get(self, user_id):
+    def get(self, user_id):  # TODO remove the get() function at the end
         user = User.query.filter(User.user_id == user_id).first()
 
         if user is None:
-            return {"error": "User with username does not exist"}, 404
+            return {"error": f"User with userid = {user_id} does not exist"}, 505
 
         return {
             "user_id": user.user_id,
@@ -41,95 +23,61 @@ class UserAPI(Resource):
         }
 
     def post(self):
-        args = entry_user_parser.parse_args()
+        args = login_user_parser.parse_args()
+        username = check_username(args["username"])
+        password = check_password(args["password"])
 
-        username = args["username"]
-        password = args["password"]
+        user = User.query.filter(
+            (User.username == username) & (User.password == password)
+        ).first()
 
-        if args["new"] == str(True):  # new user trying to get created
+        if user:
+            return {"status": 200, "logged_in": True}
+        else:
+            raise BusinessValidationError(
+                status_code=505,
+                error_code="else",
+                error_message="login error, details do not match",
+            )
 
-            email = args["email"]
 
-            if username is None:
-                raise BusinessValidationError(
-                    status_code=400,
-                    error_code="something",
-                    error_message="username is required",
-                )
+class UserRegisterAPI(Resource):
 
-            if email is None:
-                raise BusinessValidationError(
-                    status_code=400,
-                    error_code="something",
-                    error_message="email is required",
-                )
+    def post(self):
+        args = register_user_parser.parse_args()
+        username = check_username(args["username"])
+        password = check_password(args["password"])
+        email = check_email(args["email"])
 
-            if password is None:
-                raise BusinessValidationError(
-                    status_code=400,
-                    error_code="something",
-                    error_message="password is required",
-                )
+        user = User.query.filter(
+            (User.username == username) | (User.email == email)
+        ).first()
 
-            user = User.query.filter(
-                (User.username == username) | (User.email == email)
-            ).first()
+        if user:
+            raise BusinessValidationError(
+                status_code=505, error_code="else", error_message="duplicate user"
+            )
 
-            if user:
-                raise BusinessValidationError(
-                    status_code=401, error_code="else", error_message="duplicate user"
-                )
+        api_key = secrets.token_urlsafe(16)
 
+        while User.query.filter(User.api_key == api_key).first():
             api_key = secrets.token_urlsafe(16)
 
-            while User.query.filter(User.api_key == api_key).first():
-                api_key = secrets.token_urlsafe(16)
+        new_user = User(
+            username=username, email=email, password=password, api_key=api_key
+        )
+        db.session.add(new_user)
+        db.session.commit()
 
-            new_user = User(
-                username=username, email=email, password=password, api_key=api_key
-            )
-            db.session.add(new_user)
-            db.session.commit()
+        return {
+            "user_id": new_user.user_id,
+            "username": new_user.username,
+            "email": new_user.email,
+            "password": new_user.password,
+        }
 
-            return {
-                "user_id": new_user.user_id,
-                "username": new_user.username,
-                "email": new_user.email,
-                "password": new_user.password,
-            }
-        else:  # user trying to log in
-            if username is None:
-                raise BusinessValidationError(
-                    status_code=400,
-                    error_code="something",
-                    error_message="username is required",
-                )
 
-            if password is None:
-                raise BusinessValidationError(
-                    status_code=400,
-                    error_code="something",
-                    error_message="password is required",
-                )
-
-            user = User.query.filter(
-                (User.username == username) & (User.password == password)
-            ).first()
-
-            if user:
-                return {"status": 200, "logged_in": True}
-            else:
-                raise BusinessValidationError(
-                    status_code=401,
-                    error_code="else",
-                    error_message="login error, details do not match",
-                )
-
-    # def delete(self):
-    #     d = User.query.filter(User.user_id == 1).first()
-    #     db.session.delete(d)
-    #     db.session.commit()
-    #     pass
+# properly coded till here
 
 
 class UserOwnDeckList(Resource):

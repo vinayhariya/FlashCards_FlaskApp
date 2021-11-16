@@ -16,19 +16,20 @@ def login():
     elif request.method == "POST":  # after the form has been submitted
         username = request.form.get("username")
         password = request.form.get("password")
+        remember = request.form.get("remember")
 
         data = {"username": username, "password": password}
 
-        res = requests.post("http://127.0.0.1:8000/api/user", data)
+        res = requests.post("http://127.0.0.1:8000/api/user/login", data)
 
         res = res.json()
 
         if res.get("status", None):  # logged in successfully
             user = User.query.filter(User.username == username).first()
-            login_user(user, remember=True)
+            login_user(user, remember=remember)
             return redirect(url_for("main_cont.profile"))
         else:
-            flash("Please check your login details and try again.")
+            flash(res["error_message"], 'warning')
             return redirect(
                 url_for("auth.login")
             )  # if the user doesn't exist or password is wrong, reload the page
@@ -42,25 +43,29 @@ def signup():
         return render_template("signup.html")
     elif request.method == "POST":
         email = request.form.get("email")
-        name = request.form.get("name")
+        username = request.form.get("username")
         password = request.form.get("password")
+
+        print('hi', email, username, password)
 
         data = {
             "new": str(True),
-            "username": name,
+            "username": username,
             "email": email,
             "password": password,
         }
 
-        res = requests.post("http://127.0.0.1:8000/api/user", data)
+        print(data)
+
+        res = requests.post("http://127.0.0.1:8000/api/user/register", data)
 
         res = res.json()
 
         if res.get("error_code", None):
-            flash("Account address already exists")
+            flash(res["error_message"], 'danger')
             return redirect(url_for("auth.signup"))
 
-        flash("New User created. Login to continue.")
+        flash("New User created. Login to continue.", 'success')
         return redirect(url_for("auth.login"))
     else:
         return "Not Allowed SignUp"  # remove later
