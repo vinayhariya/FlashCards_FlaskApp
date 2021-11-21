@@ -130,7 +130,6 @@ def addCard_toDeck(deck_id):
         res = res.json()
 
         return redirect(url_for('main_cont.deckpage', id=deck_id))
-        return 'Clicked on add card to Deck ' f' {deck_id}'
 
 
 @main_cont.route('/start_playing/deck-<int:deck_id>')
@@ -141,3 +140,45 @@ def start_Deck(deck_id):
     res = res.json()
 
     return f'{res}'
+
+
+@main_cont.route('/view/deck-<int:deck_id>')
+@login_required
+def viewDeckCards(deck_id):
+    res = requests.get(
+        f"http://127.0.0.1:8000/api/{current_user.api_key}/user={current_user.user_id}/deck={deck_id}/cards")
+    res = res.json()
+
+    return render_template('entire_deck_cards.html', cards = res['cards'], deck_id = res['deck_id'])
+
+
+@main_cont.route("/deckpage/delete/deck_id-<int:deck_id>/card_id-<int:card_id>")
+@login_required
+def deleteDeckCard(deck_id, card_id):
+    res = requests.delete(
+        f"http://127.0.0.1:8000/api/{current_user.api_key}/user={current_user.user_id}/delete/deck={deck_id}/card={card_id}")
+    res = res.json()
+
+    if res['sta_delete_card'] == 'good':
+        return redirect(url_for("main_cont.viewDeckCards", deck_id=deck_id))
+    else:
+        return 'No good'
+
+
+@main_cont.route('/update_card/deck-<int:deck_id>/card-<int:card_id>', methods=['GET', 'POST'])
+@login_required
+def updateCard(deck_id, card_id):
+    if request.method == "GET":
+        return render_template("edit_card.html", deck_id=deck_id, card_id = card_id)
+    else:
+        card_front = request.form.get("card_front")
+        card_back = request.form.get("card_back")
+
+        data = {"user_id": current_user.user_id, "api_key": current_user.api_key, "card_id" : card_id,
+                "deck_id": deck_id, "front": card_front, "back": card_back}
+
+        res = requests.put("http://127.0.0.1:8000/api/deck/card/update", data)
+
+        res = res.json()
+
+        return redirect(url_for('main_cont.deckpage', id=deck_id))

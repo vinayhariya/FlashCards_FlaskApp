@@ -59,7 +59,7 @@ api.add_resource(UserRegisterAPI, "/api/user/register")
 api.add_resource(
     UserOwnDeckList, "/api/decks/update", "/api/decks/add", "/api/key=<string:api_key>/user_id=<int:user_id>/decks", "/api/key=<string:api_key>/user_id=<int:user_id>/delete/deck=<int:deck_id>")
 api.add_resource(
-    UserOwnDeckCards, "/api/deck/cards/add", "/api/<string:api_key>/user=<int:user_id>/deck=<int:deck_id>/cards")
+    UserOwnDeckCards, "/api/deck/card/update", "/api/deck/cards/add", "/api/<string:api_key>/user=<int:user_id>/deck=<int:deck_id>/cards", "/api/<string:api_key>/user=<int:user_id>/delete/deck=<int:deck_id>/card=<int:card_id>")
 
 api.add_resource(PublicDecks, "/api/decks/public")
 

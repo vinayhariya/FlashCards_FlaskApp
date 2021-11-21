@@ -1,4 +1,5 @@
 from flask_restful import Resource, reqparse
+from requests import api
 from api.models import Card, Deck, User
 from api.database import db
 from api.validation import BusinessValidationError
@@ -200,7 +201,7 @@ class UserOwnDeckCards(Resource):
         pass
 
     def put(self):
-        args = card_creation_parser.parse_args()
+        args = card_updation_parser.parse_args()
 
         user_id = args["user_id"]
         api_key = args["api_key"]
@@ -220,11 +221,15 @@ class UserOwnDeckCards(Resource):
         db.session.add(u_card)
         db.session.commit()
 
-    def delete(self):
-        c = Card.query.filter(Card.card_id == 1).first()
+    def delete(self, user_id, api_key, deck_id, card_id):
+        print("&&&&&&&&&&&&&&&&&&")
+        print(user_id, api_key, deck_id, card_id)
+        print("&&&&&&&&&&&&&&&&&&")
+        c = Card.query.filter((Card.card_id == card_id) & (Card.deck_id == deck_id)).first()
         db.session.delete(c)
         db.session.commit()
-        pass
+
+        return {'sta_delete_card': 'good'}
 
 
 class PublicDecks(Resource):
