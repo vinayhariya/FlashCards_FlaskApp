@@ -20,6 +20,9 @@ class User(UserMixin, db.Model):
 
     db.relationship("Deck")
 
+    def no_of_decks(self):
+        return len(self.decks)
+
 
 class Deck(db.Model):
     __tablename__ = "decks"
@@ -27,18 +30,20 @@ class Deck(db.Model):
     deck_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     deckname = db.Column(db.String(25), nullable=False)
     public = db.Column(db.Boolean, nullable=False, default=False)
-    user_id = db.Column(db.Integer, db.ForeignKey(
+    author_id = db.Column(db.Integer, db.ForeignKey(
         "users.user_id"), nullable=False)
 
     db.relationship("Card")
 
-    user = db.relationship("User", backref=backref(
+    author = db.relationship("User", backref=backref(
         "decks", cascade="all,delete"))
 
     def no_of_cards(self):
         return len(self.cards)
 
-
+    def get_author(self):
+        return self.author.username
+    
 class Card(db.Model):
     __tablename__ = "cards"
 

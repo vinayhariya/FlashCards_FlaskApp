@@ -27,7 +27,7 @@ def login():
         if res.get("status", None):  # logged in successfully
             user = User.query.filter(User.username == username).first()
             login_user(user, remember=remember)
-            return redirect(url_for("main_cont.profile"))
+            return redirect(url_for("main_cont.dashboard"))
         else:
             flash(res["error_message"], 'warning')
             return redirect(

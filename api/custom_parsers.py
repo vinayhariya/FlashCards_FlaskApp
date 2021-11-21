@@ -16,6 +16,18 @@ deck_creation_parser.add_argument("api_key")
 deck_creation_parser.add_argument("deckname")
 deck_creation_parser.add_argument("public")
 
+deck_updation_parser = reqparse.RequestParser()
+deck_updation_parser.add_argument("user_id")
+deck_updation_parser.add_argument("api_key")
+deck_updation_parser.add_argument("deckname")
+deck_updation_parser.add_argument("public")
+deck_updation_parser.add_argument("deck_id")
+
+# deck_deletion_parser = reqparse.RequestParser()
+# deck_deletion_parser.add_argument("user_id")
+# deck_deletion_parser.add_argument("api_key")
+# deck_deletion_parser.add_argument("deck_id")
+
 card_creation_parser = reqparse.RequestParser()
 card_creation_parser.add_argument("user_id")
 card_creation_parser.add_argument("api_key")

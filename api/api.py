@@ -88,12 +88,14 @@ class UserOwnDeckList(Resource):
             (User.user_id == user_id) & (User.api_key == api_key)).first()
 
         if user is None:
-            return {"error": "User with username does not exist"}, 404
+            raise BusinessValidationError(
+                status_code=505, error_code="error", error_message="Credentials invalid"
+            )
 
         deck_list = [{'deck_id': deck.deck_id, 'deck_name': deck.deckname,
                       'public': deck.public, 'no_of_cards': deck.no_of_cards()} for deck in user.decks]
 
-        return {"decks": deck_list}
+        return {"no_of_decks": user.no_of_decks(), "decks": deck_list}
 
     def post(self):
         args = deck_creation_parser.parse_args()
@@ -110,13 +112,13 @@ class UserOwnDeckList(Resource):
             return {"error": "User with username does not exist"}, 404
 
         deck_present = Deck.query.filter(
-            (Deck.user_id == user_id) & (Deck.deckname == deckname)).first()
+            (Deck.author_id == user_id) & (Deck.deckname == deckname)).first()
 
         if deck_present:
             print('Present')
         else:
             print('Not present')
-            new_deck = Deck(user_id=user_id, deckname=deckname,
+            new_deck = Deck(author_id=user_id, deckname=deckname,
                             public=bool(public))
             db.session.add(new_deck)
             db.session.commit()
@@ -124,12 +126,38 @@ class UserOwnDeckList(Resource):
 
         return {'sat': 'hi'}
 
-    def delete(self):
-        # TODO make it dynamic
-        d = Deck.query.filter(Deck.deck_id == 1).first()
+    def delete(self, user_id, api_key, deck_id):
+
+        d = Deck.query.filter(Deck.deck_id == deck_id).first()
         db.session.delete(d)
         db.session.commit()
-        pass
+
+        return {'sta': 'good'}
+
+    def put(self):
+        args = deck_updation_parser.parse_args()
+
+        print('^^^^^^^^^^^^^^^^^^^')
+        print(args)
+        print('^^^^^^^^^^^^^^^^^^^')
+
+        user_id = args["user_id"]
+        api_key = args["api_key"]
+        deckname = args["deckname"]
+        public = args["public"]
+        deck_id = args["deck_id"]
+
+        u_deck = Deck.query.filter(
+            (Deck.deck_id == deck_id) & (Deck.author_id == user_id)).first()
+
+        if deckname:
+            u_deck.deckname = deckname
+        u_deck.public = bool(public)
+
+        db.session.add(u_deck)
+        db.session.commit()
+
+        return 'Success'
 
 
 class UserOwnDeckCards(Resource):
@@ -143,7 +171,7 @@ class UserOwnDeckCards(Resource):
             return {"error": "User with username does not exist"}, 404
 
         deck = Deck.query.filter(
-            (Deck.deck_id == deck_id) & (Deck.user_id == user_id)).first()
+            (Deck.deck_id == deck_id) & (Deck.author_id == user_id)).first()
 
         if deck is None:
             return {"error": "No such deck exists for this user"}
@@ -151,7 +179,7 @@ class UserOwnDeckCards(Resource):
         card_list = [{'card_id': card.card_id, 'front': card.front,
                       'back': card.back} for card in deck.cards]
 
-        return {"deck_id": deck_id, 'no_of_cards': deck.no_of_cards(), "cards": card_list}
+        return {'deck_id': deck.deck_id, 'deck_name': deck.deckname, 'public': deck.public, 'no_of_cards': deck.no_of_cards(), "cards": card_list}
 
     pass
 
@@ -197,3 +225,15 @@ class UserOwnDeckCards(Resource):
         db.session.delete(c)
         db.session.commit()
         pass
+
+
+class PublicDecks(Resource):
+    def get(self):
+
+        decks = Deck.query.filter(Deck.public == True).all()
+
+        deck_list = [{'deck_id': deck.deck_id, 'deck_name': deck.deckname,
+                      'public': deck.public, 'no_of_cards': deck.no_of_cards(), "author": deck.get_author()} for deck in decks]
+
+        print(deck_list)
+        return {"no_of_decks": len(deck_list), "decks": deck_list}

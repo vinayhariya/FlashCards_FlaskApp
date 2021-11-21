@@ -20,8 +20,8 @@
                                 Home
                             </a>
                             {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('main_cont.profile') }}" class="navbar-item">
-                                Profile
+                            <a href="{{ url_for('main_cont.dashboard') }}" class="navbar-item">
+                                Dashboard
                             </a>
                             {% endif %}
                             {% if not current_user.is_authenticated %}
