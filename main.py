@@ -20,6 +20,10 @@ def create_app():
 
     api = Api(app)  # Main entry point for the application (with api)
 
+    api.app.config['RESTFUL_JSON'] = {
+        'ensure_ascii': False
+    }
+
     with app.app_context():
         if not database_exists(app.config["SQLALCHEMY_DATABASE_URI"]):
             db.create_all()
