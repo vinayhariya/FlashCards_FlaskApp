@@ -70,7 +70,7 @@ def updateDeck(id):
         return redirect(url_for('main_cont.deckpage', id=id))
 
 
-@main_cont.route("/deckpage/delete/id-<int:id>", methods=["POST"])
+@main_cont.route("/deckpage/delete/id-<int:id>")
 @login_required
 def deleteDeck(id):
     res = requests.delete(
