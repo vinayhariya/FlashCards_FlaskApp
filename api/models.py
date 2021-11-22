@@ -1,4 +1,5 @@
 from sqlalchemy.orm import backref
+from sqlalchemy import event
 from .database import db
 from flask_login import UserMixin
 
@@ -43,7 +44,8 @@ class Deck(db.Model):
 
     def get_author(self):
         return self.author.username
-    
+
+
 class Card(db.Model):
     __tablename__ = "cards"
 
@@ -80,22 +82,31 @@ class PerCard(db.Model):
     )
     card_id = db.Column(db.Integer, db.ForeignKey(
         "cards.card_id"), nullable=False)
-    difficulty = db.Column(
-        db.String(2), db.ForeignKey("difficulty.difficulty_id"), nullable=False
+    feedback = db.Column(
+        db.Integer, db.ForeignKey("feedback.feedback_id"), nullable=False
     )
-    score = db.Column(db.Integer, db.ForeignKey(
-        "scoring.score_id"), nullable=False)
+    # score = db.Column(db.Integer, db.ForeignKey(
+    #     "scoring.score_id"), nullable=False)
 
 
-class Difficulty(db.Model):
-    __tablename__ = "difficulty"
+class Feedback(db.Model):
+    __tablename__ = "feedback"
 
-    difficulty_id = db.Column(db.String(2), primary_key=True)
-    difficulty_desc = db.Column(db.String(15), unique=True, nullable=False)
+    feedback_id = db.Column(db.Integer, primary_key=True)
+    feedback_desc = db.Column(db.String(15), unique=True, nullable=False)
+    score = db.Column(db.Integer, nullable=False)
 
 
-class Scoring(db.Model):
-    __tablename__ = "scoring"
+@event.listens_for(Feedback.__table__, 'after_create')
+def create_departments(*args, **kwargs):
+    db.session.add(Feedback(feedback_desc="Easy", score=3))
+    db.session.add(Feedback(feedback_desc="Medium", score=1))
+    db.session.add(Feedback(feedback_desc="Difficult", score=0))
+    db.session.commit()
 
-    score_id = db.Column(db.Integer, primary_key=True)
-    score_desc = db.Column(db.String(15), unique=True, nullable=False)
+
+# class Scoring(db.Model):
+#     __tablename__ = "scoring"
+
+#     score_id = db.Column(db.Integer, primary_key=True)
+#     score_desc = db.Column(db.String(15), unique=True, nullable=False)

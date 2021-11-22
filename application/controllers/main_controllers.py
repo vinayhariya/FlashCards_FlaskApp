@@ -199,14 +199,14 @@ def studyCard(deck_id, card_id):
 
         res = res.json()
 
-        if session.get("solve_id", None) is None:
-            session["solve_id"] = res["solve_id"]
-
         card_id = res["card"]["card_id"]
 
         if card_id == -1:
             session["solve_id"] = None
             return 'Finish'
+
+        if session.get("solve_id", None) is None:
+            session["solve_id"] = res["solve_id"]
 
         return render_template('temp_card.html', card=res["card"], deck_id=deck_id, card_id=card_id)
 
@@ -215,6 +215,9 @@ def studyCard(deck_id, card_id):
             f"http://127.0.0.1:8000/api/{current_user.api_key}/user={current_user.user_id}/deck_id={deck_id}/card={card_id}/study")
 
         res = res.json()
+
+        if card_id == 0:
+            session["solve_id"] = None
 
         card_id = res["card_id"]
 
