@@ -1,11 +1,12 @@
 from flask_restful import Resource, reqparse
 from requests import api
-from api.models import Card, Deck, User
+from api.models import Card, Deck, Difficulty, PerCard, SolvingDeck, User
 from api.database import db
 from api.validation import BusinessValidationError
 from api.custom_parsers import *
 from api.custom_check_functions import *
 import secrets
+from datetime import datetime
 
 
 class UserLoginAPI(Resource):
@@ -225,7 +226,8 @@ class UserOwnDeckCards(Resource):
         print("&&&&&&&&&&&&&&&&&&")
         print(user_id, api_key, deck_id, card_id)
         print("&&&&&&&&&&&&&&&&&&")
-        c = Card.query.filter((Card.card_id == card_id) & (Card.deck_id == deck_id)).first()
+        c = Card.query.filter((Card.card_id == card_id) &
+                              (Card.deck_id == deck_id)).first()
         db.session.delete(c)
         db.session.commit()
 
@@ -242,3 +244,53 @@ class PublicDecks(Resource):
 
         print(deck_list)
         return {"no_of_decks": len(deck_list), "decks": deck_list}
+
+
+class GettingCard(Resource):
+    def get(self, user_id, api_key, deck_id, card_id):
+
+        # if card_id == 0:
+        #     sd = SolvingDeck(user_id=user_id, deck_id=deck_id,
+        #                      timestamp=datetime.now())
+        #     db.session.add(sd)
+        #     db.session.commit()
+        #     print(sd.solve_id)
+
+        card = Card.query.filter((Card.deck_id == deck_id) & (
+            Card.card_id > card_id)).first()
+
+        if card is None:
+            return {'card_id': -1}
+        return {'card_id': card.card_id, 'front': card.front, 'back': card.back}
+
+    # remove the get portion afterwards
+
+    def post(self):
+        args = solving_deck_parser.parse_args()
+        print(type(args["solve_id"]))
+
+        user_id = args["user_id"]
+        api_key = args["api_key"]
+        deck_id = args["deck_id"]
+        card_id = args["card_id"]
+        solve_id = args["solve_id"]
+        feedback = args["feedback"]
+
+        if solve_id is None:
+            sd = SolvingDeck(user_id=user_id, deck_id=deck_id,
+                             timestamp=datetime.now())
+            db.session.add(sd)
+            db.session.commit()
+            solve_id = sd.solve_id
+
+        pc = PerCard(solve_id=solve_id, card_id=card_id,
+                     difficulty=feedback, score=feedback)
+        db.session.add(pc)
+        db.session.commit()
+
+        card = Card.query.filter((Card.deck_id == deck_id) & (
+            Card.card_id > card_id)).first()
+
+        if card is None:
+            return {"card":{'card_id': -1}}
+        return {"solve_id": solve_id, "card": {'card_id': card.card_id, 'front': card.front, 'back': card.back}}

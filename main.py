@@ -3,7 +3,7 @@ from flask_restful import Api
 from flask_login import LoginManager
 from sqlalchemy_utils import database_exists
 
-from api.api import PublicDecks, UserLoginAPI, UserOwnDeckCards, UserOwnDeckList, UserRegisterAPI
+from api.api import GettingCard, PublicDecks, UserLoginAPI, UserOwnDeckCards, UserOwnDeckList, UserRegisterAPI
 from api.database import db  # importing SQLAlchemy instance
 from api.models import User
 # for configuration of Flask App
@@ -62,6 +62,8 @@ api.add_resource(
     UserOwnDeckCards, "/api/deck/card/update", "/api/deck/cards/add", "/api/<string:api_key>/user=<int:user_id>/deck=<int:deck_id>/cards", "/api/<string:api_key>/user=<int:user_id>/delete/deck=<int:deck_id>/card=<int:card_id>")
 
 api.add_resource(PublicDecks, "/api/decks/public")
+api.add_resource(
+    GettingCard, "/api/deck/study", "/api/<string:api_key>/user=<int:user_id>/deck_id=<int:deck_id>/card=<int:card_id>/study")
 
 if __name__ == "__main__":
     app.run(port=8000)  # running the app at port 8000

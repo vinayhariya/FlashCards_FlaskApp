@@ -55,7 +55,7 @@
         <div class="btn-group" role="group" id="first">
             <div class="pt-1 mb-4">
                 <a class="btn btn-dark btn-lg btn-block"
-                    href="{{ url_for('main_cont.start_Deck', deck_id = deck['deck_id']) }}">Start Study</a>
+                    href="{{ url_for('main_cont.studyCard', deck_id = deck['deck_id'], card_id = card_id) }}">Start Study</a>
             </div>
             <div class="pt-1 mb-4 ms-4">
                 <a href="{{ url_for('main_cont.updateDeck', id = deck['deck_id']) }}"

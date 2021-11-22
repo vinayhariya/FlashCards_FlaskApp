@@ -66,7 +66,7 @@ class SolvingDeck(db.Model):
     deck_id = db.Column(db.Integer, db.ForeignKey(
         "decks.deck_id"), nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False)
-    total_score = db.Column(db.Integer, nullable=True)
+    total_score = db.Column(db.Integer, nullable=True, default=0)
 
     card_unique_details = db.relationship("PerCard")
 

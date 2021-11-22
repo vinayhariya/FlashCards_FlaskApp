@@ -1,5 +1,6 @@
 from sys import meta_path
-from flask import Blueprint, render_template, redirect, url_for, request
+from flask import Blueprint, render_template, redirect, url_for, request, session
+from flask.helpers import flash
 from flask_login import login_required, current_user
 import requests
 
@@ -43,7 +44,7 @@ def deckpage(id):
     res = requests.get(
         f"http://127.0.0.1:8000/api/{current_user.api_key}/user={current_user.user_id}/deck={id}/cards")
     res = res.json()
-    return render_template("deckpage.html", name="Deck Page", deck=res)
+    return render_template("deckpage.html", name="Deck Page", deck=res, card_id=0)
     # return render_template("public_decks.html", name="Public Decks List", decks=res["decks"])
 
 
@@ -149,7 +150,7 @@ def viewDeckCards(deck_id):
         f"http://127.0.0.1:8000/api/{current_user.api_key}/user={current_user.user_id}/deck={deck_id}/cards")
     res = res.json()
 
-    return render_template('entire_deck_cards.html', cards = res['cards'], deck_id = res['deck_id'])
+    return render_template('entire_deck_cards.html', cards=res['cards'], deck_id=res['deck_id'])
 
 
 @main_cont.route("/deckpage/delete/deck_id-<int:deck_id>/card_id-<int:card_id>")
@@ -169,12 +170,12 @@ def deleteDeckCard(deck_id, card_id):
 @login_required
 def updateCard(deck_id, card_id):
     if request.method == "GET":
-        return render_template("edit_card.html", deck_id=deck_id, card_id = card_id)
+        return render_template("edit_card.html", deck_id=deck_id, card_id=card_id)
     else:
         card_front = request.form.get("card_front")
         card_back = request.form.get("card_back")
 
-        data = {"user_id": current_user.user_id, "api_key": current_user.api_key, "card_id" : card_id,
+        data = {"user_id": current_user.user_id, "api_key": current_user.api_key, "card_id": card_id,
                 "deck_id": deck_id, "front": card_front, "back": card_back}
 
         res = requests.put("http://127.0.0.1:8000/api/deck/card/update", data)
@@ -182,3 +183,42 @@ def updateCard(deck_id, card_id):
         res = res.json()
 
         return redirect(url_for('main_cont.deckpage', id=deck_id))
+
+
+# @main_cont.route('/study/deck-<int:deck_id>', methods=['GET'])
+@main_cont.route('/study/deck-<int:deck_id>/card-<int:card_id>', methods=['GET', 'POST'])
+@login_required
+def studyCard(deck_id, card_id):
+    if request.method == 'POST':
+        a = request.form.get("feedback")
+
+        data = {"user_id": current_user.user_id, "api_key": current_user.api_key,
+                "deck_id": deck_id, "card_id": card_id, "solve_id": session.get("solve_id", None), "feedback": a}
+
+        res = requests.post("http://127.0.0.1:8000/api/deck/study", data)
+
+        res = res.json()
+
+        if session.get("solve_id", None) is None:
+            session["solve_id"] = res["solve_id"]
+
+        card_id = res["card"]["card_id"]
+
+        if card_id == -1:
+            session["solve_id"] = None
+            return 'Finish'
+
+        return render_template('temp_card.html', card=res["card"], deck_id=deck_id, card_id=card_id)
+
+    else:
+        res = requests.get(
+            f"http://127.0.0.1:8000/api/{current_user.api_key}/user={current_user.user_id}/deck_id={deck_id}/card={card_id}/study")
+
+        res = res.json()
+
+        card_id = res["card_id"]
+
+        if card_id == -1:
+            return redirect(url_for('main_cont.deckpage', id=deck_id))
+
+        return render_template('temp_card.html', card=res, deck_id=deck_id, card_id=card_id)
