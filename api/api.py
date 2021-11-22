@@ -1,6 +1,6 @@
 from flask_restful import Resource, reqparse
 from requests import api
-from api.models import Card, Deck, Difficulty, PerCard, SolvingDeck, User
+from api.models import Card, Deck, Feedback, PerCard, SolvingDeck, User
 from api.database import db
 from api.validation import BusinessValidationError
 from api.custom_parsers import *
@@ -283,8 +283,9 @@ class GettingCard(Resource):
             db.session.commit()
             solve_id = sd.solve_id
 
-        pc = PerCard(solve_id=solve_id, card_id=card_id,
-                     difficulty=feedback, score=feedback)
+        feedback_obj = Feedback.query.filter(Feedback.feedback_desc == feedback).first()
+
+        pc = PerCard(solve_id=solve_id, card_id=card_id, feedback=feedback_obj.feedback_id)
         db.session.add(pc)
         db.session.commit()
 
@@ -292,5 +293,5 @@ class GettingCard(Resource):
             Card.card_id > card_id)).first()
 
         if card is None:
-            return {"card":{'card_id': -1}}
+            return {"card": {'card_id': -1}}
         return {"solve_id": solve_id, "card": {'card_id': card.card_id, 'front': card.front, 'back': card.back}}
