@@ -267,7 +267,6 @@ class GettingCard(Resource):
 
     def post(self):
         args = solving_deck_parser.parse_args()
-        print(type(args["solve_id"]))
 
         user_id = args["user_id"]
         api_key = args["api_key"]
@@ -283,10 +282,17 @@ class GettingCard(Resource):
             db.session.commit()
             solve_id = sd.solve_id
 
-        feedback_obj = Feedback.query.filter(Feedback.feedback_desc == feedback).first()
+        feedback_obj = Feedback.query.filter(
+            Feedback.feedback_desc == feedback).first()
 
-        pc = PerCard(solve_id=solve_id, card_id=card_id, feedback=feedback_obj.feedback_id)
+        pc = PerCard(solve_id=solve_id, card_id=card_id,
+                     feedback=feedback_obj.feedback_id)
         db.session.add(pc)
+
+        sd = SolvingDeck.query.filter(SolvingDeck.solve_id == solve_id).first()
+        sd.total_score += pc.getScore()
+        db.session.add(sd)
+
         db.session.commit()
 
         card = Card.query.filter((Card.deck_id == deck_id) & (
@@ -294,4 +300,10 @@ class GettingCard(Resource):
 
         if card is None:
             return {"card": {'card_id': -1}}
+
         return {"solve_id": solve_id, "card": {'card_id': card.card_id, 'front': card.front, 'back': card.back}}
+
+# class GetScoreForDeck(Resource):
+
+#     def post(self):
+#         pass

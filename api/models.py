@@ -70,7 +70,7 @@ class SolvingDeck(db.Model):
     timestamp = db.Column(db.DateTime, nullable=False)
     total_score = db.Column(db.Integer, nullable=True, default=0)
 
-    card_unique_details = db.relationship("PerCard")
+    db.relationship("PerCard")
 
 
 class PerCard(db.Model):
@@ -85,8 +85,11 @@ class PerCard(db.Model):
     feedback = db.Column(
         db.Integer, db.ForeignKey("feedback.feedback_id"), nullable=False
     )
-    # score = db.Column(db.Integer, db.ForeignKey(
-    #     "scoring.score_id"), nullable=False)
+
+    f = db.relationship("Feedback")
+
+    def getScore(self):
+        return self.f.score
 
 
 class Feedback(db.Model):
@@ -103,10 +106,3 @@ def create_departments(*args, **kwargs):
     db.session.add(Feedback(feedback_desc="Medium", score=1))
     db.session.add(Feedback(feedback_desc="Difficult", score=0))
     db.session.commit()
-
-
-# class Scoring(db.Model):
-#     __tablename__ = "scoring"
-
-#     score_id = db.Column(db.Integer, primary_key=True)
-#     score_desc = db.Column(db.String(15), unique=True, nullable=False)
