@@ -7,6 +7,7 @@ from api.custom_parsers import *
 from api.custom_check_functions import *
 import secrets
 from datetime import datetime
+from sqlalchemy import desc
 
 
 class UserLoginAPI(Resource):
@@ -251,7 +252,7 @@ class GettingCard(Resource):
 
         # if card_id == 0:
         #     sd = SolvingDeck(user_id=user_id, deck_id=deck_id,
-        #                      timestamp=datetime.now())
+        #                      start_time=datetime.now())
         #     db.session.add(sd)
         #     db.session.commit()
         #     print(sd.solve_id)
@@ -277,7 +278,7 @@ class GettingCard(Resource):
 
         if solve_id is None:
             sd = SolvingDeck(user_id=user_id, deck_id=deck_id,
-                             timestamp=datetime.now())
+                             start_time=datetime.now())
             db.session.add(sd)
             db.session.commit()
             solve_id = sd.solve_id
@@ -291,6 +292,8 @@ class GettingCard(Resource):
 
         sd = SolvingDeck.query.filter(SolvingDeck.solve_id == solve_id).first()
         sd.total_score += pc.getScore()
+        sd.time_taken_mins = round(
+            (datetime.now() - sd.start_time).total_seconds() / 60, 2)
         db.session.add(sd)
 
         db.session.commit()
@@ -303,7 +306,44 @@ class GettingCard(Resource):
 
         return {"solve_id": solve_id, "card": {'card_id': card.card_id, 'front': card.front, 'back': card.back}}
 
-# class GetScoreForDeck(Resource):
 
-#     def post(self):
-#         pass
+class GetScoreForDeck(Resource):
+
+    def get(self, user_id, api_key, deck_id):
+
+        r = SolvingDeck.query.filter((SolvingDeck.user_id == user_id) & (
+            SolvingDeck.deck_id == deck_id)).order_by(desc(SolvingDeck.start_time)).all()
+
+        return {
+            'user_id': user_id,
+            'deck_id': deck_id,
+            'rows': [
+                {
+                    "date": record.start_time.strftime("%d-%b-%Y"),
+                    "start_time": record.start_time.strftime("%I:%M:%S %p"),
+                    "time_taken": record.time_taken_mins,
+                    "total_score": record.total_score
+                }
+                for record in r
+            ]
+        }
+
+
+class GetDecksAttempted(Resource):
+    def get(self, user_id, api_key):
+
+        r = SolvingDeck.query.filter(SolvingDeck.user_id == user_id).order_by(
+            desc(SolvingDeck.start_time)).all()
+
+        return {
+            'user_id': user_id,
+            'decks_attempted': [
+                {
+                    'deckname' : record.solvedecks_r.deckname,
+                    'date': record.start_time.strftime("%d-%b-%Y"),
+                    'author': record.solvedecks_r.author.username,
+                    "total_score": record.total_score
+                }
+                for record in r
+            ]
+        }

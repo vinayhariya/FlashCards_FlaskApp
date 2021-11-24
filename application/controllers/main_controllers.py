@@ -34,8 +34,11 @@ def dashboard():
         pass
     else:
         pass
+
+    r = requests.get(f"http://127.0.0.1:8000/hi/{current_user.api_key}/user={current_user.user_id}")
+    r = r.json()
     # print(res)
-    return render_template("dashboard.html", name=current_user.username, decks=res["decks"])
+    return render_template("dashboard.html", name=current_user.username, decks=res["decks"], attempt = r["decks_attempted"])
 
 
 @main_cont.route("/deckpage/id-<int:id>")
@@ -44,7 +47,10 @@ def deckpage(id):
     res = requests.get(
         f"http://127.0.0.1:8000/api/{current_user.api_key}/user={current_user.user_id}/deck={id}/cards")
     res = res.json()
-    return render_template("deckpage.html", name="Deck Page", deck=res, card_id=0)
+
+    les = requests.get(f"http://127.0.0.1:8000/hi/{current_user.api_key}/user={current_user.user_id}/deck_id={id}")
+    les = les.json()
+    return render_template("deckpage.html", name="Deck Page", deck=res, card_id=0, t = les['rows'])
     # return render_template("public_decks.html", name="Public Decks List", decks=res["decks"])
 
 

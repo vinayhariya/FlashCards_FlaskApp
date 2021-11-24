@@ -67,10 +67,14 @@ class SolvingDeck(db.Model):
         "users.user_id"), nullable=False)
     deck_id = db.Column(db.Integer, db.ForeignKey(
         "decks.deck_id"), nullable=False)
-    timestamp = db.Column(db.DateTime, nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
+    time_taken_mins = db.Column(db.Float, nullable=True)
     total_score = db.Column(db.Integer, nullable=True, default=0)
 
     db.relationship("PerCard")
+
+    solvedecks_r = db.relationship("Deck", backref=backref(
+        "solving_deck", cascade="all,delete"))
 
 
 class PerCard(db.Model):
@@ -90,6 +94,9 @@ class PerCard(db.Model):
 
     def getScore(self):
         return self.f.score
+
+    percard_r = db.relationship("SolvingDeck", backref=backref(
+        "per_card", cascade="all,delete"))
 
 
 class Feedback(db.Model):
