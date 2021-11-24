@@ -1,3 +1,4 @@
+from api.models import User
 from api.validation import BusinessValidationError
 
 
@@ -41,3 +42,15 @@ def check_email(email):
         )
 
     return email
+
+
+def invalidUserCred():
+    raise BusinessValidationError(
+        status_code=605,
+        error_code="something",
+        error_message="invalid user cred !!!!",
+    )
+
+
+def checkUserValid(user_id, api_key):
+    return User.query.filter((User.user_id == user_id) & (User.api_key == api_key)).first() is not None

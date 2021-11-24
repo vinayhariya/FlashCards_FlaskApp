@@ -1,5 +1,4 @@
 from flask_restful import Resource, reqparse
-from requests import api
 from api.models import Card, Deck, Feedback, PerCard, SolvingDeck, User
 from api.database import db
 from api.validation import BusinessValidationError
@@ -87,13 +86,10 @@ class UserOwnDeckList(Resource):
 
     def get(self, user_id, api_key):
 
-        user = User.query.filter(
-            (User.user_id == user_id) & (User.api_key == api_key)).first()
+        if not checkUserValid(user_id=user_id, api_key=api_key):
+            invalidUserCred()
 
-        if user is None:
-            raise BusinessValidationError(
-                status_code=505, error_code="error", error_message="Credentials invalid"
-            )
+        user = User.query.filter(User.user_id == user_id).first()
 
         deck_list = [{'deck_id': deck.deck_id, 'deck_name': deck.deckname,
                       'public': deck.public, 'no_of_cards': deck.no_of_cards()} for deck in user.decks]
@@ -108,11 +104,8 @@ class UserOwnDeckList(Resource):
         deckname = args["deckname"]
         public = args["public"]
 
-        user = User.query.filter(
-            (User.user_id == user_id) & (User.api_key == api_key)).first()
-
-        if user is None:
-            return {"error": "User with username does not exist"}, 404
+        if not checkUserValid(user_id=user_id, api_key=api_key):
+            invalidUserCred()
 
         deck_present = Deck.query.filter(
             (Deck.author_id == user_id) & (Deck.deckname == deckname)).first()
@@ -131,6 +124,9 @@ class UserOwnDeckList(Resource):
 
     def delete(self, user_id, api_key, deck_id):
 
+        if not checkUserValid(user_id=user_id, api_key=api_key):
+            invalidUserCred()
+
         d = Deck.query.filter(Deck.deck_id == deck_id).first()
         db.session.delete(d)
         db.session.commit()
@@ -140,15 +136,14 @@ class UserOwnDeckList(Resource):
     def put(self):
         args = deck_updation_parser.parse_args()
 
-        print('^^^^^^^^^^^^^^^^^^^')
-        print(args)
-        print('^^^^^^^^^^^^^^^^^^^')
-
         user_id = args["user_id"]
         api_key = args["api_key"]
         deckname = args["deckname"]
         public = args["public"]
         deck_id = args["deck_id"]
+
+        if not checkUserValid(user_id=user_id, api_key=api_key):
+            invalidUserCred()
 
         u_deck = Deck.query.filter(
             (Deck.deck_id == deck_id) & (Deck.author_id == user_id)).first()
@@ -167,11 +162,8 @@ class UserOwnDeckCards(Resource):
 
     def get(self, user_id, api_key, deck_id):
 
-        user = User.query.filter(
-            (User.user_id == user_id) & (User.api_key == api_key)).first()
-
-        if user is None:
-            return {"error": "User with username does not exist"}, 404
+        if not checkUserValid(user_id=user_id, api_key=api_key):
+            invalidUserCred()
 
         deck = Deck.query.filter(
             (Deck.deck_id == deck_id) & (Deck.author_id == user_id)).first()
@@ -195,6 +187,9 @@ class UserOwnDeckCards(Resource):
         front = args["front"]
         back = args["back"]
 
+        if not checkUserValid(user_id=user_id, api_key=api_key):
+            invalidUserCred()
+
         new_card = Card(front=front, back=back, deck_id=deck_id)
 
         db.session.add(new_card)
@@ -212,6 +207,9 @@ class UserOwnDeckCards(Resource):
         front = args["front"]
         back = args["back"]
 
+        if not checkUserValid(user_id=user_id, api_key=api_key):
+            invalidUserCred()
+
         u_card = Card.query.filter(
             (Card.deck_id == deck_id) & (Card.card_id == card_id)).first()
 
@@ -224,9 +222,10 @@ class UserOwnDeckCards(Resource):
         db.session.commit()
 
     def delete(self, user_id, api_key, deck_id, card_id):
-        print("&&&&&&&&&&&&&&&&&&")
-        print(user_id, api_key, deck_id, card_id)
-        print("&&&&&&&&&&&&&&&&&&")
+
+        if not checkUserValid(user_id=user_id, api_key=api_key):
+            invalidUserCred()
+
         c = Card.query.filter((Card.card_id == card_id) &
                               (Card.deck_id == deck_id)).first()
         db.session.delete(c)
@@ -236,7 +235,10 @@ class UserOwnDeckCards(Resource):
 
 
 class PublicDecks(Resource):
-    def get(self):
+    def get(self, user_id, api_key):
+
+        if not checkUserValid(user_id=user_id, api_key=api_key):
+            invalidUserCred()
 
         decks = Deck.query.filter(Deck.public == True).all()
 
@@ -249,6 +251,9 @@ class PublicDecks(Resource):
 
 class GettingCard(Resource):
     def get(self, user_id, api_key, deck_id, card_id):
+
+        if not checkUserValid(user_id=user_id, api_key=api_key):
+            invalidUserCred()
 
         # if card_id == 0:
         #     sd = SolvingDeck(user_id=user_id, deck_id=deck_id,
@@ -264,8 +269,6 @@ class GettingCard(Resource):
             return {'card_id': -1}
         return {'card_id': card.card_id, 'front': card.front, 'back': card.back}
 
-    # remove the get portion afterwards
-
     def post(self):
         args = solving_deck_parser.parse_args()
 
@@ -275,6 +278,9 @@ class GettingCard(Resource):
         card_id = args["card_id"]
         solve_id = args["solve_id"]
         feedback = args["feedback"]
+
+        if not checkUserValid(user_id=user_id, api_key=api_key):
+            invalidUserCred()
 
         if solve_id is None:
             sd = SolvingDeck(user_id=user_id, deck_id=deck_id,
@@ -311,6 +317,9 @@ class GetScoreForDeck(Resource):
 
     def get(self, user_id, api_key, deck_id):
 
+        if not checkUserValid(user_id=user_id, api_key=api_key):
+            invalidUserCred()
+
         r = SolvingDeck.query.filter((SolvingDeck.user_id == user_id) & (
             SolvingDeck.deck_id == deck_id)).order_by(desc(SolvingDeck.start_time)).all()
 
@@ -332,6 +341,9 @@ class GetScoreForDeck(Resource):
 class GetDecksAttempted(Resource):
     def get(self, user_id, api_key):
 
+        if not checkUserValid(user_id=user_id, api_key=api_key):
+            invalidUserCred()
+
         r = SolvingDeck.query.filter(SolvingDeck.user_id == user_id).order_by(
             desc(SolvingDeck.start_time)).all()
 
@@ -339,7 +351,7 @@ class GetDecksAttempted(Resource):
             'user_id': user_id,
             'decks_attempted': [
                 {
-                    'deckname' : record.solvedecks_r.deckname,
+                    'deckname': record.solvedecks_r.deckname,
                     'date': record.start_time.strftime("%d-%b-%Y"),
                     'author': record.solvedecks_r.author.username,
                     "total_score": record.total_score

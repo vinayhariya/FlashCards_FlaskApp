@@ -21,24 +21,16 @@ def dashboard():
     res = requests.get(
         f"http://127.0.0.1:8000/api/key={current_user.api_key}/user_id={current_user.user_id}/decks")
 
-    if res.status_code == 200:
-        # print('yes')
-        pass
-    else:
-        print('error in the get request')
-        return render_template("dashboard.html", name='Devil')
+    if res.status_code != 200:
+        return 'error in the get request in the main.cont -> dashboard'
 
     res = res.json()
 
-    if res["no_of_decks"] > 0:
-        pass
-    else:
-        pass
-
-    r = requests.get(f"http://127.0.0.1:8000/hi/{current_user.api_key}/user={current_user.user_id}")
+    r = requests.get(
+        f"http://127.0.0.1:8000/hi/{current_user.api_key}/user={current_user.user_id}")
     r = r.json()
-    # print(res)
-    return render_template("dashboard.html", name=current_user.username, decks=res["decks"], attempt = r["decks_attempted"])
+
+    return render_template("dashboard.html", name=current_user.username, decks=res["decks"], attempt=r["decks_attempted"])
 
 
 @main_cont.route("/deckpage/id-<int:id>")
@@ -48,9 +40,10 @@ def deckpage(id):
         f"http://127.0.0.1:8000/api/{current_user.api_key}/user={current_user.user_id}/deck={id}/cards")
     res = res.json()
 
-    les = requests.get(f"http://127.0.0.1:8000/hi/{current_user.api_key}/user={current_user.user_id}/deck_id={id}")
+    les = requests.get(
+        f"http://127.0.0.1:8000/hi/{current_user.api_key}/user={current_user.user_id}/deck_id={id}")
     les = les.json()
-    return render_template("deckpage.html", name="Deck Page", deck=res, card_id=0, t = les['rows'])
+    return render_template("deckpage.html", name="Deck Page", deck=res, card_id=0, t=les['rows'])
     # return render_template("public_decks.html", name="Public Decks List", decks=res["decks"])
 
 
@@ -115,7 +108,7 @@ def add_new_deck():
 @main_cont.route("/public_decks")
 @login_required
 def publicDeckPage():
-    res = requests.get("http://127.0.0.1:8000/api/decks/public")
+    res = requests.get(f"http://127.0.0.1:8000/api/{current_user.api_key}/{current_user.user_id}/decks/public")
     res = res.json()
     return render_template("public_decks.html", name="Public Decks List", decks=res["decks"])
 
