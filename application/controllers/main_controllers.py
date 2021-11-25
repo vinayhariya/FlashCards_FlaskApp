@@ -36,8 +36,11 @@ def dashboard():
 @main_cont.route("/deckpage/id-<int:id>")
 @login_required
 def deckpage(id):
+    # res = requests.get(
+    #     f"http://127.0.0.1:8000/api/{current_user.api_key}/user={current_user.user_id}/deck={id}/cards")
+    # res = res.json()
     res = requests.get(
-        f"http://127.0.0.1:8000/api/{current_user.api_key}/user={current_user.user_id}/deck={id}/cards")
+        f"http://127.0.0.1:8000/api/{current_user.api_key}/user={current_user.user_id}/deck_id={id}/brief_info")
     res = res.json()
 
     les = requests.get(
@@ -149,7 +152,7 @@ def viewDeckCards(deck_id):
         f"http://127.0.0.1:8000/api/{current_user.api_key}/user={current_user.user_id}/deck={deck_id}/cards")
     res = res.json()
 
-    return render_template('entire_deck_cards.html', cards=res['cards'], deck_id=res['deck_id'])
+    return render_template('entire_deck_cards.html', cards=res['cards'], deck_id=res['deck_id'], owner = res['owner'])
 
 
 @main_cont.route("/deckpage/delete/deck_id-<int:deck_id>/card_id-<int:card_id>")

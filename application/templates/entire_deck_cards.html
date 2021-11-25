@@ -47,21 +47,25 @@
         </div>
     </nav>
     <div class="container-fluid">
-        {% for card_row in cards|batch(4) %}
+        {% for card_row in cards|batch(3) %}
         <div class="row mt-2">
             {% for card in card_row %}
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="card" style="background-color: lightyellow; margin:10px;">
                     <div class="card-body">
                         <p class="h4 card-title">{{card["card_id"]}}
                         </p>
                         <p class="card-text">Front -> {{card["front"]}}</p>
                         <p class="card-text">Back -> {{card["back"]}}</p>
+
+                        {% if owner %}
+
                         <a href="{{url_for('main_cont.updateCard', deck_id = deck_id, card_id = card['card_id']) }}"
                             class="btn btn-warning">Edit</a>
                         <a href="{{url_for('main_cont.deleteDeckCard', deck_id = deck_id, card_id = card['card_id']) }}"
                             class="btn btn-danger"
                             onclick="return confirm('Are you sure you want to delete this card?')">Delete</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>

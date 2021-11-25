@@ -174,7 +174,16 @@ class UserOwnDeckCards(Resource):
         card_list = [{'card_id': card.card_id, 'front': card.front,
                       'back': card.back} for card in deck.cards]
 
-        return {'deck_id': deck.deck_id, 'deck_name': deck.deckname, 'public': deck.public, 'no_of_cards': deck.no_of_cards(), "cards": card_list}
+        owner = deck.author_id == user_id
+
+        return {
+            'owner': owner,
+            'deck_id': deck.deck_id,
+            'deck_name': deck.deckname,
+            'public': deck.public,
+            'no_of_cards': deck.no_of_cards(),
+            "cards": card_list
+        }
 
     pass
 
@@ -358,4 +367,29 @@ class GetDecksAttempted(Resource):
                 }
                 for record in r
             ]
+        }
+
+
+class DeckBriefInfo(Resource):
+    def get(self, user_id, api_key, deck_id):
+
+        if not checkUserValid(user_id=user_id, api_key=api_key):
+            invalidUserCred()
+
+        deck = Deck.query.filter(
+            (Deck.deck_id == deck_id) & ((Deck.author_id == user_id) | (Deck.public == True))).first()
+
+        if deck is None:
+            # put proper thing here
+            return {"error": "No such deck exists for thihs user"}
+
+        # may change the variable name later (to author)
+        owner = deck.author_id == user_id
+
+        return {
+            'owner': owner,
+            'deck_id': deck.deck_id,
+            'deck_name': deck.deckname,
+            'public': deck.public,
+            'no_of_cards': deck.no_of_cards()
         }
