@@ -166,7 +166,7 @@ class UserOwnDeckCards(Resource):
             invalidUserCred()
 
         deck = Deck.query.filter(
-            (Deck.deck_id == deck_id) & (Deck.author_id == user_id)).first()
+            (Deck.deck_id == deck_id) & ((Deck.author_id == user_id) | (Deck.public == True))).first()
 
         if deck is None:
             return {"error": "No such deck exists for this user"}
