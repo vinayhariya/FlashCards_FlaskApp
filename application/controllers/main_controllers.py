@@ -215,3 +215,12 @@ def studyCard(deck_id, card_id):
             return redirect(url_for('main_cont.deckpage', id=deck_id))
 
         return render_template('temp_card.html', card=res, deck_id=deck_id, card_id=card_id)
+
+
+@main_cont.route('/public_decks/aname-<string:author_name>')
+@login_required
+def pa_decks(author_name):
+    res = requests.get(
+        f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/publicDecks/author={author_name}/get")
+    res = res.json()
+    return render_template("author_related_pub_decks.html", author=author_name, decks=res["decks"])

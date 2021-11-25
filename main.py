@@ -3,7 +3,7 @@ from flask_restful import Api
 from flask_login import LoginManager
 from sqlalchemy_utils import database_exists
 
-from api.api import CardResource, DeckCardList, PublicDecks, StudyCard, UserDeckAttempted, UserDeckScore, UserLoginAPI, UserDeckList, UserRegisterAPI, DeckResource
+from api.api import CardResource, DeckCardList, PublicDeckAuthorRelated, PublicDecks, StudyCard, UserDeckAttempted, UserDeckScore, UserLoginAPI, UserDeckList, UserRegisterAPI, DeckResource
 from api.database import db  # importing SQLAlchemy instance
 from api.models import User
 # for configuration of Flask App
@@ -90,9 +90,7 @@ api.add_resource(UserDeckAttempted,
 api.add_resource(
     StudyCard, "/api/user_id=<int:user_id>/api_key=<string:api_key>/deck_id=<int:deck_id>/card_id=<int:card_id>/study/get", "/api/deck/study")
 
-
-# api.add_resource(
-#     GettingCard, "/api/deck/study", "/api/<string:api_key>/user=<int:user_id>/deck_id=<int:deck_id>/card=<int:card_id>/study")
+api.add_resource(PublicDeckAuthorRelated, "/api/user_id=<int:user_id>/api_key=<string:api_key>/publicDecks/author=<string:author_name>/get")
 
 
 if __name__ == "__main__":

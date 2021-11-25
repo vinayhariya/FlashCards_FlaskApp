@@ -650,3 +650,27 @@ class StudyCard(Resource):
             return {"card": {'card_id': -1}}
 
         return {"solve_id": solve_id, "card": {'card_id': card.card_id, 'front': card.front, 'back': card.back}}
+
+
+class PublicDeckAuthorRelated(Resource):
+    def get(self, user_id, api_key, author_name):
+        if not checkUserValid(user_id=user_id, api_key=api_key):
+            invalidUserCred()
+
+        author = User.query.filter(User.username == author_name).first()
+
+        decks = Deck.query.filter(
+            (Deck.author_id == author.user_id) & (Deck.public == True)).all()
+
+        deck_list = [
+            {
+                'deck_id': deck.deck_id,
+                'deck_name': deck.deckname,
+                'public': deck.public,
+                'no_of_cards': deck.no_of_cards(),
+            }
+            for deck in decks
+        ]
+
+        # TODO send back proper response
+        return {"no_of_decks": len(deck_list), "decks": deck_list, "author": author_name}
