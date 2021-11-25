@@ -95,9 +95,11 @@ class PerCard(db.Model):
     def getScore(self):
         return self.f.score
 
-    percard_r = db.relationship("SolvingDeck", backref=backref(
+    perdeck_r = db.relationship("SolvingDeck", backref=backref(
         "per_card", cascade="all,delete"))
 
+    percard_r = db.relationship("Card", backref=backref(
+        "per_card", cascade="all,delete"))
 
 class Feedback(db.Model):
     __tablename__ = "feedback"
