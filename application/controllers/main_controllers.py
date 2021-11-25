@@ -27,7 +27,7 @@ def dashboard():
     res = res.json()
 
     r = requests.get(
-        f"http://127.0.0.1:8000/hi/{current_user.api_key}/user={current_user.user_id}")
+        f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/decks_attempted/get")
     r = r.json()
 
     return render_template("dashboard.html", name=current_user.username, decks=res["decks"], attempt=r["decks_attempted"])
@@ -43,7 +43,7 @@ def deckpage(id):  # TODO change the parameter name
     res = res.json()
 
     les = requests.get(
-        f"http://127.0.0.1:8000/hi/{current_user.api_key}/user={current_user.user_id}/deck_id={id}")
+        f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={id}/score/get")
     les = les.json()
     return render_template("deckpage.html", name="Deck Page", deck=res, card_id=0, t=les['rows'])
     # return render_template("public_decks.html", name="Public Decks List", decks=res["decks"])
@@ -64,7 +64,7 @@ def updateDeck(id):
         res = requests.put("http://127.0.0.1:8000/api/deck/update", data)
 
         res = res.json()
-        
+
         return redirect(url_for('main_cont.deckpage', id=id))
 
 
@@ -108,7 +108,7 @@ def add_new_deck():
 @login_required
 def publicDeckPage():
     res = requests.get(
-        f"http://127.0.0.1:8000/api/{current_user.api_key}/{current_user.user_id}/decks/public")
+        f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/publicDecks")
     res = res.json()
     return render_template("public_decks.html", name="Public Decks List", decks=res["decks"])
 
@@ -130,16 +130,6 @@ def addCard_toDeck(deck_id):
         res = res.json()
 
         return redirect(url_for('main_cont.deckpage', id=deck_id))
-
-
-@main_cont.route('/start_playing/deck-<int:deck_id>')
-@login_required
-def start_Deck(deck_id):
-    res = requests.get(
-        f"http://127.0.0.1:8000/api/{current_user.api_key}/user={current_user.user_id}/deck={deck_id}/cards")
-    res = res.json()
-
-    return f'{res}'
 
 
 @main_cont.route('/view/deck-<int:deck_id>')
@@ -212,7 +202,7 @@ def studyCard(deck_id, card_id):
 
     else:
         res = requests.get(
-            f"http://127.0.0.1:8000/api/{current_user.api_key}/user={current_user.user_id}/deck_id={deck_id}/card={card_id}/study")
+            f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={deck_id}/card_id={card_id}/study/get")
 
         res = res.json()
 

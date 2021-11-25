@@ -1,4 +1,4 @@
-from flask_restful import Resource, reqparse
+from flask_restful import Resource
 from api.models import Card, Deck, Feedback, PerCard, SolvingDeck, User
 from api.database import db
 from api.validation import BusinessValidationError
@@ -10,11 +10,23 @@ from sqlalchemy import desc
 
 
 class UserLoginAPI(Resource):
+    """
+    For Login
+    """
 
     def get(self, user_id):  # TODO remove the get() function at the end
+        """To get the credentials of the user requested
+
+        Args:
+            user_id (int): id of the user (used in the database)
+
+        Returns:
+            [type]: [description]
+        """
         user = User.query.filter(User.user_id == user_id).first()
 
         if user is None:
+            # TODO put proper error
             return {"error": f"User with userid = {user_id} does not exist"}, 505
 
         return {
@@ -25,6 +37,14 @@ class UserLoginAPI(Resource):
         }
 
     def post(self):
+        """To securly check the credentials of the user
+
+        Raises:
+            BusinessValidationError: In case of mismatch of details
+
+        Returns:
+            [type]: [description]
+        """
         args = login_user_parser.parse_args()
         username = check_username(args["username"])
         password = check_password(args["password"])
@@ -34,6 +54,7 @@ class UserLoginAPI(Resource):
         ).first()
 
         if user:
+            # TODO put proper
             return {"status": 200, "logged_in": True}
         else:
             raise BusinessValidationError(
@@ -44,8 +65,19 @@ class UserLoginAPI(Resource):
 
 
 class UserRegisterAPI(Resource):
+    """
+    For Register
+    """
 
     def post(self):
+        """Creating a new user
+
+        Raises:
+            BusinessValidationError: if the details are duplicate
+
+        Returns:
+            [type]: [description]
+        """
         args = register_user_parser.parse_args()
         username = check_username(args["username"])
         password = check_password(args["password"])
@@ -72,17 +104,14 @@ class UserRegisterAPI(Resource):
         db.session.commit()
 
         return {
-            "user_id": new_user.user_id,
-            "username": new_user.username,
-            "email": new_user.email,
-            "password": new_user.password,
-        }
-
-
-# properly coded till here
+            "stat": "good"
+        }  # TODO check if this is the best way to send the data back
 
 
 class UserDeckList(Resource):
+    """
+    For getting the list of decks created by the user
+    """
 
     def get(self, user_id, api_key):
         """Used to get the list of decks created by the user
@@ -460,21 +489,111 @@ class CardResource(Resource):
 
 class PublicDecks(Resource):
     def get(self, user_id, api_key):
+        """To get all the public decks available
+
+        Args:
+            user_id (int): id of the user (used in the database)
+            api_key (string - 16 chars): used for user api auth everytime a request is made
+
+        Returns:
+            [type]: [description]
+        """
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
             invalidUserCred()
 
         decks = Deck.query.filter(Deck.public == True).all()
 
-        deck_list = [{'deck_id': deck.deck_id, 'deck_name': deck.deckname,
-                      'public': deck.public, 'no_of_cards': deck.no_of_cards(), "author": deck.get_author()} for deck in decks]
+        deck_list = [
+            {'deck_id': deck.deck_id,
+             'deck_name': deck.deckname,
+             'public': deck.public,
+             'no_of_cards': deck.no_of_cards(),
+             "author": deck.get_author()
+             }
+            for deck in decks
+        ]
 
+        # TODO send back proper response
         return {"no_of_decks": len(deck_list), "decks": deck_list}
 
 
-class GettingCard(Resource):
-    def get(self, user_id, api_key, deck_id, card_id):
+class UserDeckScore(Resource):
 
+    def get(self, user_id, api_key, deck_id):
+        """To get all the scores made by the user of a specific deck in order of the latest attempt
+
+        Args:
+            user_id (int): id of the user (used in the database)
+            api_key (string - 16 chars): used for user api auth everytime a request is made
+            deck_id (int): id of the specific deck requested
+
+        Returns:
+            [type]: [description]
+        """
+
+        if not checkUserValid(user_id=user_id, api_key=api_key):
+            invalidUserCred()
+
+        times_solved = SolvingDeck.query.filter((SolvingDeck.user_id == user_id) & (
+            SolvingDeck.deck_id == deck_id)).order_by(desc(SolvingDeck.start_time)).all()
+
+        return {
+            'user_id': user_id,
+            'deck_id': deck_id,
+            'rows': [
+                {
+                    "date": record.start_time.strftime("%d-%b-%Y"),
+                    "start_time": record.start_time.strftime("%I:%M:%S %p"),
+                    "time_taken": record.time_taken_mins,
+                    "total_score": record.total_score
+                }
+                for record in times_solved
+            ]
+        }  # TODO check if this is the best way to send the data back
+
+
+class UserDeckAttempted(Resource):
+
+    def get(self, user_id, api_key):
+        """To get all the decks attempted by the user order of the latest attempt
+
+        Args:
+            user_id (int): id of the user (used in the database)
+            api_key (string - 16 chars): used for user api auth everytime a request is made
+
+        Returns:
+            [type]: [description]
+        """
+
+        if not checkUserValid(user_id=user_id, api_key=api_key):
+            invalidUserCred()
+
+        decks_attempted = SolvingDeck.query.filter(
+            SolvingDeck.user_id == user_id).order_by(desc(SolvingDeck.start_time)).all()
+
+        return {
+            'user_id': user_id,
+            'decks_attempted': [
+                {
+                    'creator': record.solvedecks_r.author_id == user_id,
+                    'deck_id': record.solvedecks_r.deck_id,
+                    'public': record.solvedecks_r.public,
+                    'deckname': record.solvedecks_r.deckname,
+                    'date': record.start_time.strftime("%d-%b-%Y"),
+                    'author': record.solvedecks_r.author.username,
+                    "total_score": record.total_score
+                }
+                for record in decks_attempted
+            ]
+        }  # TODO check if this is the best way to send the data back
+
+# properly revieww the code below on 26-11-2021
+
+
+class StudyCard(Resource):
+
+    def get(self, user_id, api_key, deck_id, card_id):
         if not checkUserValid(user_id=user_id, api_key=api_key):
             invalidUserCred()
 
@@ -482,7 +601,10 @@ class GettingCard(Resource):
             Card.card_id > card_id)).first()
 
         if card is None:
-            return {'card_id': -1}
+            # either the deck is finished or in id sent is not valid
+            return {'card_id': -1}  # TODO send back proper response
+
+        # TODO check if this is the best way to send the data back
         return {'card_id': card.card_id, 'front': card.front, 'back': card.back}
 
     def post(self):
@@ -499,6 +621,7 @@ class GettingCard(Resource):
             invalidUserCred()
 
         if solve_id is None:
+            # first card solved, thus making a solve_id
             sd = SolvingDeck(user_id=user_id, deck_id=deck_id,
                              start_time=datetime.now())
             db.session.add(sd)
@@ -527,54 +650,3 @@ class GettingCard(Resource):
             return {"card": {'card_id': -1}}
 
         return {"solve_id": solve_id, "card": {'card_id': card.card_id, 'front': card.front, 'back': card.back}}
-
-
-class GetScoreForDeck(Resource):
-
-    def get(self, user_id, api_key, deck_id):
-
-        if not checkUserValid(user_id=user_id, api_key=api_key):
-            invalidUserCred()
-
-        r = SolvingDeck.query.filter((SolvingDeck.user_id == user_id) & (
-            SolvingDeck.deck_id == deck_id)).order_by(desc(SolvingDeck.start_time)).all()
-
-        return {
-            'user_id': user_id,
-            'deck_id': deck_id,
-            'rows': [
-                {
-                    "date": record.start_time.strftime("%d-%b-%Y"),
-                    "start_time": record.start_time.strftime("%I:%M:%S %p"),
-                    "time_taken": record.time_taken_mins,
-                    "total_score": record.total_score
-                }
-                for record in r
-            ]
-        }
-
-
-class GetDecksAttempted(Resource):
-    def get(self, user_id, api_key):
-
-        if not checkUserValid(user_id=user_id, api_key=api_key):
-            invalidUserCred()
-
-        r = SolvingDeck.query.filter(SolvingDeck.user_id == user_id).order_by(
-            desc(SolvingDeck.start_time)).all()
-
-        return {
-            'user_id': user_id,
-            'decks_attempted': [
-                {
-                    'creator': record.solvedecks_r.author_id == user_id,
-                    'deck_id': record.solvedecks_r.deck_id,
-                    'public': record.solvedecks_r.public,
-                    'deckname': record.solvedecks_r.deckname,
-                    'date': record.start_time.strftime("%d-%b-%Y"),
-                    'author': record.solvedecks_r.author.username,
-                    "total_score": record.total_score
-                }
-                for record in r
-            ]
-        }

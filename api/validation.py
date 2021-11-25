@@ -3,7 +3,7 @@ from flask import make_response
 import json
 
 
-class BusinessValidationError(HTTPException):
+class BusinessValidationError(HTTPException): # put proper validationn
     def __init__(self, status_code, error_code, error_message):
         data = {
             "error_code": error_code,

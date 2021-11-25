@@ -3,7 +3,7 @@ from flask_restful import Api
 from flask_login import LoginManager
 from sqlalchemy_utils import database_exists
 
-from api.api import CardResource, DeckCardList, GetDecksAttempted, GetScoreForDeck, GettingCard, PublicDecks, UserLoginAPI, UserDeckList, UserRegisterAPI, DeckResource
+from api.api import CardResource, DeckCardList, PublicDecks, StudyCard, UserDeckAttempted, UserDeckScore, UserLoginAPI, UserDeckList, UserRegisterAPI, DeckResource
 from api.database import db  # importing SQLAlchemy instance
 from api.models import User
 # for configuration of Flask App
@@ -53,12 +53,14 @@ def create_app():
 
 app, api = create_app()
 
-api.add_resource(UserLoginAPI, "/api/user/<int:user_id>", "/api/user/login")
-api.add_resource(UserRegisterAPI, "/api/user/register")
+api.add_resource(
+    UserLoginAPI, "/api/user/user_id=<int:user_id>/get", "/api/user/login")
 
+api.add_resource(UserRegisterAPI, "/api/user/register")
 
 api.add_resource(
     UserDeckList, "/api/user_id=<int:user_id>/api_key=<string:api_key>/decksList")
+
 api.add_resource(DeckResource,
                  "/api/user_id=<int:user_id>/api_key=<string:api_key>/deck_id=<int:deck_id>/get",
                  "/api/deck/add",
@@ -68,6 +70,7 @@ api.add_resource(DeckResource,
 
 api.add_resource(
     DeckCardList, "/api/user_id=<int:user_id>/api_key=<string:api_key>/deck_id=<int:deck_id>/cardsList")
+
 api.add_resource(CardResource,
                  "/api/user_id=<int:user_id>/api_key=<string:api_key>/card_id=<int:card_id>/get",
                  "/api/deck/card/add",
@@ -75,15 +78,22 @@ api.add_resource(CardResource,
                  "/api/user_id=<int:user_id>/api_key=<string:api_key>/deck_id=<int:deck_id>/card_id=<int:card_id>/delete"
                  )
 
+api.add_resource(
+    PublicDecks, "/api/user_id=<int:user_id>/api_key=<string:api_key>/publicDecks")
 
 api.add_resource(
-    PublicDecks, "/api/<string:api_key>/<int:user_id>/decks/public")
-api.add_resource(
-    GettingCard, "/api/deck/study", "/api/<string:api_key>/user=<int:user_id>/deck_id=<int:deck_id>/card=<int:card_id>/study")
+    UserDeckScore, "/api/user_id=<int:user_id>/api_key=<string:api_key>/deck_id=<int:deck_id>/score/get")
+
+api.add_resource(UserDeckAttempted,
+                 "/api/user_id=<int:user_id>/api_key=<string:api_key>/decks_attempted/get")
 
 api.add_resource(
-    GetScoreForDeck, "/hi/<string:api_key>/user=<int:user_id>/deck_id=<int:deck_id>/")
-api.add_resource(GetDecksAttempted, "/hi/<string:api_key>/user=<int:user_id>/")
+    StudyCard, "/api/user_id=<int:user_id>/api_key=<string:api_key>/deck_id=<int:deck_id>/card_id=<int:card_id>/study/get", "/api/deck/study")
+
+
+# api.add_resource(
+#     GettingCard, "/api/deck/study", "/api/<string:api_key>/user=<int:user_id>/deck_id=<int:deck_id>/card=<int:card_id>/study")
+
 
 if __name__ == "__main__":
     app.run(port=8000)  # running the app at port 8000
