@@ -75,7 +75,7 @@
             <table class="table table-bordered" style="margin-right: 10px; text-align: center;">
                 <thead>
                     <th scope="col">#</th>
-                    <th scope="col">Dec Name</th>
+                    <th scope="col">Deck Name</th>
                     <th scope="col">Date Attempted</th>
                     <th scope="col">Author</th>
                     <th scope="col">Total Score</th>
@@ -84,7 +84,13 @@
                     {% for r in attempt %}
                     <tr>
                         <td>{{loop.index}}</td>
-                        <td>{{r["deckname"]}}</td>
+                        <td>
+                            {% if r["public"] or r["creator"] %}
+                            <a href="{{ url_for('main_cont.deckpage', id=r['deck_id']) }}"> {{r["deckname"]}} </a>
+                            {%else%}
+                            {{r["deckname"]}}
+                            {% endif %}
+                        </td>
                         <td>{{r["date"]}}</td>
                         <td>{{r["author"]}}</td>
                         <td>{{r["total_score"]}}</td>

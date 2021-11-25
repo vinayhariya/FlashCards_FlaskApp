@@ -58,7 +58,7 @@
                         <p class="card-text">Front -> {{card["front"]}}</p>
                         <p class="card-text">Back -> {{card["back"]}}</p>
 
-                        {% if owner %}
+                        {% if creator %}
 
                         <a href="{{url_for('main_cont.updateCard', deck_id = deck_id, card_id = card['card_id']) }}"
                             class="btn btn-warning">Edit</a>

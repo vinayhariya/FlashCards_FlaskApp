@@ -59,7 +59,7 @@
                     Study</a>
             </div>
 
-            {% if deck["owner"] %}
+            {% if deck["creator"] %}
 
             <div class="pt-1 mb-4 ms-4">
                 <a href="{{ url_for('main_cont.updateDeck', id = deck['deck_id']) }}"
@@ -74,7 +74,7 @@
             {% endif %}
         </div>
 
-        {% if deck["owner"] %}
+        {% if deck["creator"] %}
 
         <div class="pt-1 mb-4">
             <a class="btn btn-dark btn-lg btn-block"

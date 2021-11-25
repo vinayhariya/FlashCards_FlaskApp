@@ -19,7 +19,7 @@ def index():
 def dashboard():
 
     res = requests.get(
-        f"http://127.0.0.1:8000/api/key={current_user.api_key}/user_id={current_user.user_id}/decks")
+        f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/decksList")
 
     if res.status_code != 200:
         return 'error in the get request in the main.cont -> dashboard'
@@ -35,12 +35,11 @@ def dashboard():
 
 @main_cont.route("/deckpage/id-<int:id>")
 @login_required
-def deckpage(id):
-    # res = requests.get(
-    #     f"http://127.0.0.1:8000/api/{current_user.api_key}/user={current_user.user_id}/deck={id}/cards")
-    # res = res.json()
+def deckpage(id):  # TODO change the parameter name
+
     res = requests.get(
-        f"http://127.0.0.1:8000/api/{current_user.api_key}/user={current_user.user_id}/deck_id={id}/brief_info")
+        f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={id}/get")
+
     res = res.json()
 
     les = requests.get(
@@ -62,22 +61,20 @@ def updateDeck(id):
         data = {"user_id": current_user.user_id, "api_key": current_user.api_key,
                 "deckname": deckname, "public": public, "deck_id": id}
 
-        res = requests.put("http://127.0.0.1:8000/api/decks/update", data)
+        res = requests.put("http://127.0.0.1:8000/api/deck/update", data)
 
         res = res.json()
-
-        print("****************")
-        print(res)
-        print('Update')
-        print("****************")
+        
         return redirect(url_for('main_cont.deckpage', id=id))
 
 
 @main_cont.route("/deckpage/delete/id-<int:id>")
 @login_required
 def deleteDeck(id):
+
     res = requests.delete(
-        f"http://127.0.0.1:8000/api/key={current_user.api_key}/user_id={current_user.user_id}/delete/deck={id}")
+        f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={id}/delete")
+
     res = res.json()
 
     if res['sta'] == 'good':
@@ -89,7 +86,6 @@ def deleteDeck(id):
 @main_cont.route("/add_deck", methods=["GET", "POST"])
 @login_required
 def add_new_deck():
-    print(request.method)
     if request.method == "GET":
         return render_template("add_new_deck_page.html")
     elif request.method == "POST":
@@ -99,7 +95,7 @@ def add_new_deck():
         data = {"user_id": current_user.user_id, "api_key": current_user.api_key,
                 "deckname": deckname, "public": public}
 
-        res = requests.post("http://127.0.0.1:8000/api/decks/add", data)
+        res = requests.post("http://127.0.0.1:8000/api/deck/add", data)
 
         res = res.json()
 
@@ -111,7 +107,8 @@ def add_new_deck():
 @main_cont.route("/public_decks")
 @login_required
 def publicDeckPage():
-    res = requests.get(f"http://127.0.0.1:8000/api/{current_user.api_key}/{current_user.user_id}/decks/public")
+    res = requests.get(
+        f"http://127.0.0.1:8000/api/{current_user.api_key}/{current_user.user_id}/decks/public")
     res = res.json()
     return render_template("public_decks.html", name="Public Decks List", decks=res["decks"])
 
@@ -128,7 +125,7 @@ def addCard_toDeck(deck_id):
         data = {"user_id": current_user.user_id, "api_key": current_user.api_key,
                 "deck_id": deck_id, "front": card_front, "back": card_back}
 
-        res = requests.post("http://127.0.0.1:8000/api/deck/cards/add", data)
+        res = requests.post("http://127.0.0.1:8000/api/deck/card/add", data)
 
         res = res.json()
 
@@ -149,17 +146,18 @@ def start_Deck(deck_id):
 @login_required
 def viewDeckCards(deck_id):
     res = requests.get(
-        f"http://127.0.0.1:8000/api/{current_user.api_key}/user={current_user.user_id}/deck={deck_id}/cards")
+        f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={deck_id}/cardsList")
     res = res.json()
 
-    return render_template('entire_deck_cards.html', cards=res['cards'], deck_id=res['deck_id'], owner = res['owner'])
+    return render_template('entire_deck_cards.html', cards=res['cards'], deck_id=res['deck_id'], creator=res['creator'])
 
 
 @main_cont.route("/deckpage/delete/deck_id-<int:deck_id>/card_id-<int:card_id>")
 @login_required
 def deleteDeckCard(deck_id, card_id):
+
     res = requests.delete(
-        f"http://127.0.0.1:8000/api/{current_user.api_key}/user={current_user.user_id}/delete/deck={deck_id}/card={card_id}")
+        f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={deck_id}/card_id={card_id}/delete")
     res = res.json()
 
     if res['sta_delete_card'] == 'good':
