@@ -1,12 +1,14 @@
 from flask_restful import Resource
 from api.models import Card, Deck, Feedback, PerCard, SolvingDeck, User
 from api.database import db
-from api.validation import BusinessValidationError
+from api.validation import DoesNotExistError, LoginError, NotAllowedError, UnauthenticatedUserError
 from api.custom_parsers import *
 from api.custom_check_functions import *
 import secrets
 from datetime import datetime
 from sqlalchemy import desc
+
+# TODO fill in the proper doc strinngs
 
 
 class UserLoginAPI(Resource):
@@ -14,7 +16,7 @@ class UserLoginAPI(Resource):
     For Login
     """
 
-    def get(self, user_id):  # TODO remove the get() function at the end
+    def get(self, user_id):
         """To get the credentials of the user requested
 
         Args:
@@ -26,15 +28,14 @@ class UserLoginAPI(Resource):
         user = User.query.filter(User.user_id == user_id).first()
 
         if user is None:
-            # TODO put proper error
-            return {"error": f"User with userid = {user_id} does not exist"}, 505
+            raise DoesNotExistError(
+                error_message=f"User with user_id = {user_id} does not exist.")
 
         return {
             "user_id": user.user_id,
             "username": user.username,
             "email": user.email,
-            "api_key": user.api_key,
-        }
+        }, 200
 
     def post(self):
         """To securly check the credentials of the user
@@ -54,14 +55,13 @@ class UserLoginAPI(Resource):
         ).first()
 
         if user:
-            # TODO put proper
-            return {"status": 200, "logged_in": True}
+            return {
+                "status_code": 200,
+                "logged_in": True,
+                "api_key": user.api_key
+            }, 200
         else:
-            raise BusinessValidationError(
-                status_code=505,
-                error_code="else",
-                error_message="login error, details do not match",
-            )
+            raise LoginError(error_message="Invalid login details !")
 
 
 class UserRegisterAPI(Resource):
@@ -88,9 +88,12 @@ class UserRegisterAPI(Resource):
         ).first()
 
         if user:
-            raise BusinessValidationError(
-                status_code=505, error_code="else", error_message="duplicate user"
-            )
+            if User.query.filter(User.email == email).first():
+                raise NotAllowedError(
+                    error_message="Email is taken. Use another email.")
+            else:
+                raise NotAllowedError(
+                    error_message="Username is taken. Use another username.")
 
         api_key = secrets.token_urlsafe(16)
 
@@ -104,8 +107,9 @@ class UserRegisterAPI(Resource):
         db.session.commit()
 
         return {
-            "stat": "good"
-        }  # TODO check if this is the best way to send the data back
+            "status_code": 201,
+            "message": "User registered successfully"
+        }, 201
 
 
 class UserDeckList(Resource):
@@ -122,7 +126,8 @@ class UserDeckList(Resource):
         """
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
-            invalidUserCred()
+            raise UnauthenticatedUserError(
+                error_message="Invalid API User Credentials")
 
         user = User.query.filter(User.user_id == user_id).first()
 
@@ -136,9 +141,11 @@ class UserDeckList(Resource):
         ]
 
         return {
+            "status_code": 200,
+            "user_id": user_id,
             "no_of_decks": user.no_of_decks(),
             "decks": deck_list
-        }  # TODO check if this is the best way to send the data back
+        }, 200
 
 
 class DeckResource(Resource):
@@ -159,25 +166,30 @@ class DeckResource(Resource):
         """
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
-            invalidUserCred()
+            raise UnauthenticatedUserError(
+                error_message="Invalid API User Credentials")
 
         deck = Deck.query.filter(
             (Deck.deck_id == deck_id) & ((Deck.author_id == user_id) | (Deck.public == True))).first()
 
         if deck is None:
-            # TODO put proper error
-            return {"error": "No such deck exists for this user"}
+            if Deck.query.filter(Deck.deck_id).first():
+                raise NotAllowedError(
+                    error_message='Deck does not exist for this user.')
+            else:
+                raise DoesNotExistError(error_message='Deck does not exist.')
 
         creator = deck.author_id == user_id
 
         return {
+            'status_code': 200,
             'creator': creator,
             'deck_id': deck.deck_id,
-            'deck_author' : deck.author.username,
+            'deck_author': deck.author.username,
             'deck_name': deck.deckname,
             'public': deck.public,
             'no_of_cards': deck.no_of_cards()
-        }  # TODO check if this is the best way to send the data back
+        }, 200
 
     def post(self):
         """Used to enter into of a new deck into the database (CREATE) 
@@ -193,21 +205,25 @@ class DeckResource(Resource):
         public = args["public"]
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
-            invalidUserCred()
+            raise UnauthenticatedUserError(
+                error_message="Invalid API User Credentials")
 
         deck_present = Deck.query.filter(
             (Deck.author_id == user_id) & (Deck.deckname == deckname)).first()
 
         if deck_present:
-            # TODO add an error code here for duplicate name for that particular user
-            print('Duplicate deck name present')
+            raise NotAllowedError(
+                error_message='Deck with same name is already present.')
         else:
             new_deck = Deck(author_id=user_id,
                             deckname=deckname, public=bool(public))
             db.session.add(new_deck)
             db.session.commit()
 
-        return {'sat': 'hi'}  # TODO send back proper response
+        return {
+            "status_code": 201,
+            "message": "Deck created successfully"
+        }, 201
 
     def put(self):
         """Used for updating the information of the exisiting deck (UPDATE)
@@ -224,14 +240,14 @@ class DeckResource(Resource):
         public = args["public"]
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
-            invalidUserCred()
+            raise UnauthenticatedUserError(
+                error_message="Invalid API User Credentials")
 
         u_deck = Deck.query.filter(
             (Deck.deck_id == deck_id) & (Deck.author_id == user_id)).first()
 
         if not u_deck:  # deck does not exist
-            # TODO give proper error message
-            return 'Deck does not exist'
+            raise DoesNotExistError(error_message='Deck does not exist.')
 
         if deckname:
 
@@ -239,8 +255,8 @@ class DeckResource(Resource):
                 (Deck.author_id == user_id) & (Deck.deckname == deckname)).first()
 
             if duplicate_deck_name:  # if a deck with that name already exists
-                # TODO give proper error message
-                return 'Deck name should not be duplicate'
+                raise NotAllowedError(
+                    error_message='Deck with same name is already present.')
 
             u_deck.deckname = deckname
 
@@ -249,7 +265,10 @@ class DeckResource(Resource):
         db.session.add(u_deck)
         db.session.commit()
 
-        return 'Success'  # TODO send back proper response
+        return {
+            "status_code": 201,
+            "message": "Deck updated successfully"
+        }, 201
 
     def delete(self, user_id, api_key, deck_id):
         """Used to delete the specific deck requested (DELETE)
@@ -263,19 +282,26 @@ class DeckResource(Resource):
             [type]: [description]
         """
         if not checkUserValid(user_id=user_id, api_key=api_key):
-            invalidUserCred()
+            raise UnauthenticatedUserError(
+                error_message="Invalid API User Credentials")
 
         deck_exists = Deck.query.filter(
             (Deck.author_id == user_id) & (Deck.deck_id == deck_id)).first()
 
-        if not deck_exists:
-            # TODO give proper error message
-            return 'Deck either not there or does not belong to the user'
+        if deck_exists is None:
+            if Deck.query.filter(Deck.deck_id).first():
+                raise NotAllowedError(
+                    error_message='Deck does not exist for this user.')
+            else:
+                raise DoesNotExistError(error_message='Deck does not exist.')
 
         db.session.delete(deck_exists)
         db.session.commit()
 
-        return {'sta': 'good'}  # TODO send back proper response
+        return {
+            "status_code": 200,
+            "message": "Deck deleted successfully"
+        }, 200
 
 
 class DeckCardList(Resource):
@@ -293,14 +319,18 @@ class DeckCardList(Resource):
         """
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
-            invalidUserCred()
+            raise UnauthenticatedUserError(
+                error_message="Invalid API User Credentials")
 
         deck = Deck.query.filter(
             (Deck.deck_id == deck_id) & ((Deck.author_id == user_id) | (Deck.public == True))).first()
 
         if deck is None:
-            # TODO give proper error message
-            return {"error": "No such deck exists for this user"}
+            if Deck.query.filter(Deck.deck_id).first():
+                raise NotAllowedError(
+                    error_message='Deck does not exist for this user.')
+            else:
+                raise DoesNotExistError(error_message='Deck does not exist.')
 
         card_list = [
             {'card_id': card.card_id,
@@ -311,13 +341,14 @@ class DeckCardList(Resource):
         ]
 
         return {
+            "status_code": 200,
             'creator': deck.author_id == user_id,
             'deck_id': deck.deck_id,
             'deck_name': deck.deckname,
             'public': deck.public,
             'no_of_cards': deck.no_of_cards(),
             "cards": card_list
-        }  # TODO check if this is the best way to send the data back
+        }, 200
 
 
 class CardResource(Resource):
@@ -340,27 +371,28 @@ class CardResource(Resource):
         """
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
-            invalidUserCred()
+            raise UnauthenticatedUserError(
+                error_message="Invalid API User Credentials")
 
         card = Card.query.filter(Card.card_id == card_id).first()
 
         if not card:
-            # TODO give proper error message
-            return {"error": "No such card exists"}
+            raise DoesNotExistError(error_message='Card does not exist.')
 
         if not card.deck.public:
             if not (card.deck.author_id == user_id):
-                # TODO give proper error message
-                return {"error": "No such card exists for this user"}
+                raise NotAllowedError(
+                    error_message='Card does not exist for this user.')
 
         return{
+            "status_code": 200,
             'creator': card.deck.author_id == user_id,
             'deck_id': card.deck.deck_id,
             'deck_name': card.deck.deckname,
             'card_id': card.card_id,
             'card_front': card.front,
             'card_back': card.back
-        }  # TODO check if this is the best way to send the data back
+        }, 200
 
     def post(self):
         """Used to create a new card to be part of a deck created by user (CREATE)
@@ -377,28 +409,35 @@ class CardResource(Resource):
         back = args["back"]
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
-            invalidUserCred()
+            raise UnauthenticatedUserError(
+                error_message="Invalid API User Credentials")
 
         deck = Deck.query.filter((Deck.deck_id == deck_id) & (
             Deck.author_id == user_id)).first()
 
-        if not deck:
-            # TODO give proper error message
-            return {"error": "No such deck exists for this user"}
+        if deck is None:
+            if Deck.query.filter(Deck.deck_id).first():
+                raise NotAllowedError(
+                    error_message='Deck does not exist for this user.')
+            else:
+                raise DoesNotExistError(error_message='Deck does not exist.')
 
         card = Card.query.filter((Card.deck_id == deck_id) & (
             (Card.front == front) | (Card.back == back))).first()
 
         if card:
-            # TODO give proper error message
-            return {"error": "Duplicate Card for this deck"}
+            raise NotAllowedError(
+                error_message='Card with same details is already present.')
 
         new_card = Card(front=front, back=back, deck_id=deck_id)
 
         db.session.add(new_card)
         db.session.commit()
 
-        return {'sat': 'hi'}  # TODO send back proper response
+        return {
+            "status_code": 201,
+            "message": "Card added successfully"
+        }, 201
 
     def put(self):
         """Used to update a particular card of a deck (UPDATE)
@@ -416,44 +455,45 @@ class CardResource(Resource):
         back = args["back"]
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
-            invalidUserCred()
+            raise UnauthenticatedUserError(
+                error_message="Invalid API User Credentials")
 
         card = Card.query.filter(
             (Card.deck_id == deck_id) & (Card.card_id == card_id)).first()
 
-        if not card:
-            # TODO give proper error message
-            return {"error": "Card does not exist"}
+        if card is None:
+            raise DoesNotExistError(error_message='Card does not exist.')
 
         if not (card.deck.author_id == user_id):
-            # TODO give proper error message
-            return {"error": "Card does not exist for this user"}
+            raise NotAllowedError(
+                error_message='Card does not exist for this user.')
 
         if front:
             c = Card.query.filter((Card.deck_id == deck_id)
                                   & (Card.front == front)).first()
-
             if c:
-                # TODO give proper error message
-                return {"error": "Card duplaicate with new front"}
+                raise NotAllowedError(
+                    error_message='Card front with same details is already present.')
 
             card.front = front
 
         if back:
-
             c = Card.query.filter((Card.deck_id == deck_id)
                                   & (Card.back == back)).first()
 
             if c:
-                # TODO give proper error message
-                return {"error": "Card duplaicate with new back"}
+                raise NotAllowedError(
+                    error_message='Card back with same details is already present.')
 
             card.back = back
 
         db.session.add(card)
         db.session.commit()
 
-        return {'sat': 'hi'}  # TODO send back proper response
+        return {
+            "status_code": 201,
+            "message": "Card updated successfully"
+        }, 201
 
     def delete(self, user_id, api_key, deck_id, card_id):
         """Used to delete a particular card from a deck (DELETE)
@@ -469,23 +509,26 @@ class CardResource(Resource):
         """
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
-            invalidUserCred()
+            raise UnauthenticatedUserError(
+                error_message="Invalid API User Credentials")
 
         c = Card.query.filter((Card.card_id == card_id) &
                               (Card.deck_id == deck_id)).first()
 
-        if not c:
-            # TODO give proper error message
-            return {"error": "Card does not exist"}
+        if c is None:
+            raise DoesNotExistError(error_message='Card does not exist.')
 
-        if not c.deck.author_id == user_id:
-            # TODO give proper error message
-            return {"error": "Card does not exist for this user"}
+        if not (c.deck.author_id == user_id):
+            raise NotAllowedError(
+                error_message='Card does not exist for this user.')
 
         db.session.delete(c)
         db.session.commit()
 
-        return {'sta_delete_card': 'good'}  # TODO send back proper response
+        return {
+            "status_code": 200,
+            "message": "Card deleted successfully"
+        }, 200
 
 
 class PublicDecks(Resource):
@@ -501,7 +544,8 @@ class PublicDecks(Resource):
         """
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
-            invalidUserCred()
+            raise UnauthenticatedUserError(
+                error_message="Invalid API User Credentials")
 
         decks = Deck.query.filter(Deck.public == True).all()
 
@@ -515,8 +559,11 @@ class PublicDecks(Resource):
             for deck in decks
         ]
 
-        # TODO send back proper response
-        return {"no_of_decks": len(deck_list), "decks": deck_list}
+        return {
+            "status_code": 200,
+            "no_of_decks": len(deck_list),
+            "decks": deck_list
+        }, 200
 
 
 class UserDeckScore(Resource):
@@ -534,12 +581,14 @@ class UserDeckScore(Resource):
         """
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
-            invalidUserCred()
+            raise UnauthenticatedUserError(
+                error_message="Invalid API User Credentials")
 
         times_solved = SolvingDeck.query.filter((SolvingDeck.user_id == user_id) & (
             SolvingDeck.deck_id == deck_id)).order_by(desc(SolvingDeck.start_time)).all()
 
         return {
+            'status_code': 200,
             'user_id': user_id,
             'deck_id': deck_id,
             'rows': [
@@ -551,7 +600,7 @@ class UserDeckScore(Resource):
                 }
                 for record in times_solved
             ]
-        }  # TODO check if this is the best way to send the data back
+        }, 200
 
 
 class UserDeckAttempted(Resource):
@@ -568,12 +617,14 @@ class UserDeckAttempted(Resource):
         """
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
-            invalidUserCred()
+            raise UnauthenticatedUserError(
+                error_message="Invalid API User Credentials")
 
         decks_attempted = SolvingDeck.query.filter(
             SolvingDeck.user_id == user_id).order_by(desc(SolvingDeck.start_time)).all()
 
         return {
+            'status_code': 200,
             'user_id': user_id,
             'decks_attempted': [
                 {
@@ -583,11 +634,11 @@ class UserDeckAttempted(Resource):
                     'deckname': record.solvedecks_r.deckname,
                     'date': record.start_time.strftime("%d-%b-%Y"),
                     'author': record.solvedecks_r.author.username,
-                    "total_score": record.total_score
+                    'total_score': record.total_score
                 }
                 for record in decks_attempted
             ]
-        }  # TODO check if this is the best way to send the data back
+        }, 200
 
 
 class StudyCard(Resource):
@@ -605,17 +656,24 @@ class StudyCard(Resource):
             [type]: [description]
         """
         if not checkUserValid(user_id=user_id, api_key=api_key):
-            invalidUserCred()
+            raise UnauthenticatedUserError(
+                error_message="Invalid API User Credentials")
 
         card = Card.query.filter((Card.deck_id == deck_id) & (
             Card.card_id > card_id)).first()
 
         if card is None:
-            # either the deck is finished or in id sent is not valid
-            return {'card_id': -1}  # TODO send back proper response
+            raise NotAllowedError(error_message="Error in Studying Card")
 
-        # TODO check if this is the best way to send the data back
-        return {'card_id': card.card_id, 'front': card.front, 'back': card.back}
+        return {
+            "status_code": 200,
+            "card": {
+                'card_id': card.card_id,
+            },
+            'front': card.front,
+            'back': card.back,
+            'message': 'Finished Deck, Score updated in the table'
+        }, 200
 
     def post(self):
         """Add the feedback of a single card studied by the user
@@ -633,7 +691,8 @@ class StudyCard(Resource):
         feedback = args["feedback"]
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
-            invalidUserCred()
+            raise UnauthenticatedUserError(
+                error_message="Invalid API User Credentials")
 
         if solve_id is None:
             # first card solved, thus making a solve_id
@@ -662,9 +721,23 @@ class StudyCard(Resource):
             Card.card_id > card_id)).first()
 
         if card is None:
-            return {"card": {'card_id': -1}}
+            return {
+                "status_code": 200,
+                "card": {
+                    'card_id': -1,
+                },
+                'message': 'Finished Deck, Score updated in the table'
+            }, 200
 
-        return {"solve_id": solve_id, "card": {'card_id': card.card_id, 'front': card.front, 'back': card.back}}
+        return {
+            "status_code": 200,
+            "solve_id": solve_id,
+            "card": {
+                'card_id': card.card_id,
+                'front': card.front,
+                'back': card.back
+            }
+        }, 200
 
 
 class PublicDeckAuthorRelated(Resource):
@@ -680,7 +753,8 @@ class PublicDeckAuthorRelated(Resource):
             [type]: [description]
         """
         if not checkUserValid(user_id=user_id, api_key=api_key):
-            invalidUserCred()
+            raise UnauthenticatedUserError(
+                error_message="Invalid API User Credentials")
 
         author = User.query.filter(User.username == author_name).first()
 
@@ -697,5 +771,9 @@ class PublicDeckAuthorRelated(Resource):
             for deck in decks
         ]
 
-        # TODO send back proper response
-        return {"no_of_decks": len(deck_list), "decks": deck_list, "author": author_name}
+        return {
+            "status_code": 200,
+            "no_of_decks": len(deck_list),
+            "decks": deck_list,
+            "author": author_name
+        }, 200

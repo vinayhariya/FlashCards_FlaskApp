@@ -1,7 +1,5 @@
 from flask_restful import reqparse
 
-# TODO change this accordingly
-
 login_user_parser = reqparse.RequestParser()
 login_user_parser.add_argument("username")
 login_user_parser.add_argument("password")
@@ -10,7 +8,6 @@ register_user_parser = reqparse.RequestParser()
 register_user_parser.add_argument("username")
 register_user_parser.add_argument("email")
 register_user_parser.add_argument("password")
-
 
 deck_creation_parser = reqparse.RequestParser()
 deck_creation_parser.add_argument("user_id", type=int)

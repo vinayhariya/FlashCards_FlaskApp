@@ -32,6 +32,16 @@ Dashboard
 {% endblock %}
 
 {% block main_section %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
 <section>
     <p class="h1 mt-2 ms-4" style="color: black;">Personal Decks</p>
 </section>

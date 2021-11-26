@@ -7,15 +7,13 @@ from api.models import User
 auth = Blueprint("auth", __name__,
                  template_folder="../templates/auth_templates")
 
-# TODO change the part just after the request after fixing the api
-
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
         return render_template("login.html")
 
-    elif request.method == "POST":  # after the form has been submitted
+    elif request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
         remember = request.form.get("remember")
@@ -24,20 +22,19 @@ def login():
 
         res = requests.post("http://127.0.0.1:8000/api/user/login", data)
 
+        status_code = res.status_code
         res = res.json()
 
-        if res.get("status", None):  # logged in successfully
+        if status_code == 200:
             username = username.strip().title()
             user = User.query.filter(User.username == username).first()
             login_user(user, remember=remember)
             return redirect(url_for("main_cont.dashboard"))
         else:
             flash(res["error_message"], 'warning')
-            return redirect(
-                url_for("auth.login")
-            )  # if the user doesn't exist or password is wrong, reload the page
-    else:
-        return "Not Allowed Login"  # remove later
+
+            # if the user doesn't exist or password is wrong, reload the page
+            return redirect(url_for("auth.login"))
 
 
 @auth.route("/signup", methods=["GET", "POST"])
@@ -49,8 +46,6 @@ def signup():
         username = request.form.get("username")
         password = request.form.get("password")
 
-        print('hi', email, username, password)
-
         data = {
             "new": str(True),
             "username": username,
@@ -58,20 +53,17 @@ def signup():
             "password": password,
         }
 
-        print(data)
-
         res = requests.post("http://127.0.0.1:8000/api/user/register", data)
 
+        status_code = res.status_code
         res = res.json()
 
-        if res.get("error_code", None):
+        if status_code == 201:
+            flash("New User created. Login to continue.", 'success')
+            return redirect(url_for("auth.login"))
+        else:
             flash(res["error_message"], 'danger')
             return redirect(url_for("auth.signup"))
-
-        flash("New User created. Login to continue.", 'success')
-        return redirect(url_for("auth.login"))
-    else:
-        return "Not Allowed SignUp"  # remove later
 
 
 @auth.route("/logout")
