@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}
+Study Card
+{% endblock %}
+
+{% block main_section %}
+<section class="vh-100">
+    <div class="container py-5 h-50">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col col-xl-8" onclick="ans()">
+                <div class="card" style="border-radius: 1rem;">
+                    <div class="card-body p-4 p-lg-5 text-black">
+                        <div class="font-weight-bold" style="text-align: center; font-size: 2.15em; font-weight:600;">
+                            {{card["front"]}}
+                        </div>
+                        <section id="solution" style="display: none;">
+                            <hr>
+                            <div style="text-align: center; font-size: 1.40em;">
+                                {{card["back"]}}
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <p>
+        <a class="btn btn-dark btn-lg btn-block" onclick="ans()" id="reveal">Reveal Ans</a>
+    <form action="{{ url_for('main_cont.studyCard', deck_id = deck_id, card_id = card_id) }}" method="post">
+        Feedback:
+        <div class="form-check-inline">
+            <input class="form-check-input" type="radio" name="feedback" id="feedback-easy" value="Easy">
+            <label class="form-check-label" for="feedback-easy">Easy</label>
+        </div>
+        <div class="form-check-inline">
+            <input class="form-check-input" type="radio" name="feedback" id="feedback-medium" value="Medium">
+            <label class="form-check-label" for="feedback-medium">Medium</label>
+        </div>
+        <div class="form-check-inline">
+            <input class="form-check-input" type="radio" name="feedback" id="feedback-difficult" value="Difficult"
+                checked>
+            <label class="form-check-label" for="feedback-difficult">Difficult</label>
+        </div>
+        <br><br>
+        <button class="btn btn-dark btn-lg btn-block" type="submit">Next Card</button>
+
+    </form>
+    </p>
+</section>
+{% endblock %}
+
+{% block js_scripts %}
+<script>
+    var ans_sec = document.getElementById('solution');
+    var reveal_button = document.getElementById('reveal');
+    function ans() {
+        if (ans_sec.style.display == 'none') {
+            ans_sec.style.display = 'block';
+            reveal_button.innerHTML = "Hide Ans"
+        }
+        else {
+            ans_sec.style.display = 'none';
+            reveal_button.innerHTML = "Reveal Ans"
+        }
+    }
+</script>
+
+<script>
+    if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
+</script>
+{% endblock %}

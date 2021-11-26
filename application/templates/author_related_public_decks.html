@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-Public Decks
+Author Decks
 {% endblock %}
 
 {% block custom_navbar %}
@@ -28,7 +28,7 @@ Public Decks
 
 {% block main_section %}
 <section>
-    <p class="h1 mt-2 ms-4">Public Decks</p>
+    <p class="h1 mt-2 ms-4">Public Decks of Author {{author}}</p>
 </section>
 <div class="container-fluid">
     {% if decks %}
@@ -45,9 +45,8 @@ Public Decks
                         </span>
                     </div>
                     </p>
-                    <p class="card-text">No of Cards = {{deck["no_of_cards"]}}
-                        <br>
-                        Creator --> {{deck["author"]}}
+                    <p class="card-text">
+                        No of Cards = {{deck["no_of_cards"]}}
                     </p>
                     <a href="{{ url_for('main_cont.deckpage', deck_id=deck['deck_id']) }}"
                         class="btn btn-danger">Explore</a>

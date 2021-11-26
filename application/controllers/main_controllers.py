@@ -2,7 +2,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for,
 from flask_login import login_required, current_user
 import requests
 
-main_cont = Blueprint("main_cont", __name__, template_folder="../templates")
+main_cont = Blueprint("main_cont", __name__, template_folder="../templates", static_folder="../static")
 
 # TODO change the part just after the request after fixing the api
 
@@ -53,7 +53,7 @@ def deckpage(deck_id):
 @login_required
 def add_new_deck():
     if request.method == "GET":
-        return render_template("add_new_deck_page.html")
+        return render_template("add_new_deck.html")
     elif request.method == "POST":
         deckname = request.form.get("deckname")
         public = request.form.get("public")
@@ -76,7 +76,7 @@ def add_new_deck():
 @login_required
 def updateDeck(deck_id):
     if request.method == "GET":
-        return render_template("update_deck_page.html", deck_id=deck_id)
+        return render_template("update_deck.html", deck_id=deck_id)
     else:
         deckname = request.form.get("deckname")
         public = request.form.get("public")
@@ -115,7 +115,7 @@ def deleteDeck(deck_id):
 @login_required
 def add_new_card(deck_id):
     if request.method == "GET":
-        return render_template("add_new_card_page.html", deck_id=deck_id)
+        return render_template("add_new_card.html", deck_id=deck_id)
     else:
         card_front = request.form.get("card_front")
         card_back = request.form.get("card_back")
@@ -153,7 +153,7 @@ def delete_card(deck_id, card_id):
 @login_required
 def update_card(deck_id, card_id):
     if request.method == "GET":
-        return render_template("edit_card.html", deck_id=deck_id, card_id=card_id)
+        return render_template("update_card.html", deck_id=deck_id, card_id=card_id)
     else:
         card_front = request.form.get("card_front")
         card_back = request.form.get("card_back")
@@ -181,7 +181,7 @@ def view_deck_cards(deck_id):
         f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={deck_id}/cardsList")
     res = res.json()
 
-    return render_template('entire_deck_cards.html', cards=res['cards'], deck_id=res['deck_id'], creator=res['creator'])
+    return render_template('view_deck_cards.html', cards=res['cards'], deck_id=res['deck_id'], creator=res['creator'])
 
 
 @main_cont.route("/public_decks")
@@ -216,12 +216,13 @@ def studyCard(deck_id, card_id):
 
         if card_id == -1:
             session["solve_id"] = None
-            return 'Finish'
+            # /return 'Finish'
+            return redirect(url_for('main_cont.deckpage', deck_id=deck_id))
 
         if session.get("solve_id", None) is None:
             session["solve_id"] = res["solve_id"]
 
-        return render_template('temp_card.html', card=res["card"], deck_id=deck_id, card_id=card_id)
+        return render_template('study_card.html', card=res["card"], deck_id=deck_id, card_id=card_id)
     else:
         res = requests.get(
             f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={deck_id}/card_id={card_id}/study/get")
@@ -236,7 +237,7 @@ def studyCard(deck_id, card_id):
         if card_id == -1:
             return redirect(url_for('main_cont.deckpage', deck_id=deck_id))
 
-        return render_template('temp_card.html', card=res, deck_id=deck_id, card_id=card_id)
+        return render_template('study_card.html', card=res, deck_id=deck_id, card_id=card_id)
 
 
 @main_cont.route('/public_decks/author_name=<string:author_name>')
@@ -245,4 +246,4 @@ def author_public_decks(author_name):
     res = requests.get(
         f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/publicDecks/author={author_name}/get")
     res = res.json()
-    return render_template("author_related_pub_decks.html", author=author_name, decks=res["decks"])
+    return render_template("author_related_public_decks.html", author=author_name, decks=res["decks"])
