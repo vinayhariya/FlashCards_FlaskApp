@@ -14,9 +14,9 @@ class User(UserMixin, db.Model):
         return (self.user_id)
 
     user_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    username = db.Column(db.String(25), nullable=False, unique=True)
-    email = db.Column(db.String(50), nullable=False, unique=True)
-    password = db.Column(db.String(50), nullable=False)
+    username = db.Column(db.String(35), nullable=False, unique=True)
+    email = db.Column(db.String(60), nullable=False, unique=True)
+    password = db.Column(db.String(60), nullable=False)
     api_key = db.Column(db.String(16), nullable=False)
 
     db.relationship("Deck")
@@ -29,7 +29,7 @@ class Deck(db.Model):
     __tablename__ = "decks"
 
     deck_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    deckname = db.Column(db.String(25), nullable=False)
+    deckname = db.Column(db.String(40), nullable=False)
     public = db.Column(db.Boolean, nullable=False, default=False)
     author_id = db.Column(db.Integer, db.ForeignKey(
         "users.user_id"), nullable=False)
@@ -50,8 +50,8 @@ class Card(db.Model):
     __tablename__ = "cards"
 
     card_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    front = db.Column(db.String(255), nullable=False)
-    back = db.Column(db.String(255), nullable=False)
+    front = db.Column(db.Text, nullable=False)
+    back = db.Column(db.Text, nullable=False)
     deck_id = db.Column(db.Integer, db.ForeignKey(
         "decks.deck_id"), nullable=False)
 
