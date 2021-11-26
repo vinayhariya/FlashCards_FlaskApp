@@ -1,6 +1,6 @@
 from api.models import User
 from api.validation import BusinessValidationError
-
+# TODO change this accordingly
 
 def check_username(username):
     if username is None or username.strip() == '':

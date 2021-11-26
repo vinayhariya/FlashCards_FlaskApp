@@ -27,7 +27,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="{{ url_for('main_cont.publicDeckPage') }}">
+                        <a class="nav-link active" href="{{ url_for('main_cont.public_decks') }}">
                             Public Decks
                         </a>
                     </li>
@@ -50,6 +50,9 @@
                 {% if deck["public"] == True %} Public {%else%} Private {%endif %}
             </span>
         </p>
+        <p>Author = <a
+                href="{{ url_for('main_cont.author_public_decks', author_name=deck['deck_author']) }}">{{deck["deck_author"]}}</a>
+        </p>
         <p>No of Cards = {{deck["no_of_cards"]}}</p>
 
         <div class="btn-group" role="group" id="first">
@@ -62,13 +65,13 @@
             {% if deck["creator"] %}
 
             <div class="pt-1 mb-4 ms-4">
-                <a href="{{ url_for('main_cont.updateDeck', id = deck['deck_id']) }}"
+                <a href="{{ url_for('main_cont.updateDeck', deck_id = deck['deck_id']) }}"
                     class="btn btn-dark btn-lg btn-block">Update Deck</a>
             </div>
             <div class="pt-1 mb-4 ms-4">
                 <a class="btn btn-dark btn-lg btn-block" type="submit"
                     onclick="return confirm('Are you sure you want to delete the deck?')"
-                    href="{{ url_for('main_cont.deleteDeck', id = deck['deck_id']) }}">Delete Deck</a>
+                    href="{{ url_for('main_cont.deleteDeck', deck_id = deck['deck_id']) }}">Delete Deck</a>
             </div>
 
             {% endif %}
@@ -78,14 +81,14 @@
 
         <div class="pt-1 mb-4">
             <a class="btn btn-dark btn-lg btn-block"
-                href="{{ url_for('main_cont.addCard_toDeck', deck_id = deck['deck_id']) }}">Add Card to Deck</a>
+                href="{{ url_for('main_cont.add_new_card', deck_id = deck['deck_id']) }}">Add Card to Deck</a>
         </div>
 
         {% endif %}
 
         <div class="pt-1 mb-4">
             <a class="btn btn-dark btn-lg btn-block"
-                href="{{ url_for('main_cont.viewDeckCards', deck_id = deck['deck_id']) }}">View Entire Deck</a>
+                href="{{ url_for('main_cont.view_deck_cards', deck_id = deck['deck_id']) }}">View Entire Deck</a>
         </div>
 
         <br><br>
@@ -100,7 +103,7 @@
                     <th scope="col">Total Score</th>
                 </thead>
                 <tbody>
-                    {% for r in t %}
+                    {% for r in attempt %}
                     <tr>
                         <td>{{loop.index}}</td>
                         <td>{{r["date"]}}</td>

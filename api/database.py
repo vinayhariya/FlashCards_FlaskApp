@@ -1,7 +1,3 @@
-# from sqlalchemy.ext.declarative import declarative_base
-# Base = declarative_base()
-# engine = None
-
 import os
 from flask_sqlalchemy import SQLAlchemy
 

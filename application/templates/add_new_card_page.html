@@ -38,7 +38,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="{{ url_for('main_cont.deckpage', id=deck_id) }}">
+                        <a class="nav-link active" href="{{ url_for('main_cont.deckpage', deck_id=deck_id) }}">
                             Goto Deck
                         </a>
                     </li>
@@ -66,7 +66,7 @@
                             {% endfor %}
                             {% endif %}
                             {% endwith %}
-                            <form action="{{ url_for('main_cont.addCard_toDeck', deck_id = deck_id) }}" method="post">
+                            <form action="{{ url_for('main_cont.add_new_card', deck_id = deck_id) }}" method="post">
                                 <div class="mb-3 pb-1" style="text-align: center;">
                                     <span class="h1 fw-bold mb-0">Add New Card</span>
                                 </div>

@@ -173,6 +173,7 @@ class DeckResource(Resource):
         return {
             'creator': creator,
             'deck_id': deck.deck_id,
+            'deck_author' : deck.author.username,
             'deck_name': deck.deckname,
             'public': deck.public,
             'no_of_cards': deck.no_of_cards()
@@ -588,12 +589,21 @@ class UserDeckAttempted(Resource):
             ]
         }  # TODO check if this is the best way to send the data back
 
-# properly revieww the code below on 26-11-2021
-
 
 class StudyCard(Resource):
 
     def get(self, user_id, api_key, deck_id, card_id):
+        """To get a single card in study mode
+
+        Args:
+            user_id (int): id of the user (used in the database)
+            api_key (string - 16 chars): used for user api auth everytime a request is made
+            deck_id (int): id of the specific deck requested
+            card_id (int): id of the specific card requested
+
+        Returns:
+            [type]: [description]
+        """
         if not checkUserValid(user_id=user_id, api_key=api_key):
             invalidUserCred()
 
@@ -608,6 +618,11 @@ class StudyCard(Resource):
         return {'card_id': card.card_id, 'front': card.front, 'back': card.back}
 
     def post(self):
+        """Add the feedback of a single card studied by the user
+
+        Returns:
+            [type]: [description]
+        """
         args = solving_deck_parser.parse_args()
 
         user_id = args["user_id"]
@@ -654,6 +669,16 @@ class StudyCard(Resource):
 
 class PublicDeckAuthorRelated(Resource):
     def get(self, user_id, api_key, author_name):
+        """To get all the public decks affiliated with the particular author
+
+        Args:
+            user_id (int): id of the user (used in the database)
+            api_key (string - 16 chars): used for user api auth everytime a request is made
+            author_name ([type]): name of the author/creator of the deck
+
+        Returns:
+            [type]: [description]
+        """
         if not checkUserValid(user_id=user_id, api_key=api_key):
             invalidUserCred()
 

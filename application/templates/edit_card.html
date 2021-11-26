@@ -37,12 +37,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="{{ url_for('main_cont.viewDeckCards', deck_id = deck_id) }}">
+                        <a class="nav-link active" href="{{ url_for('main_cont.view_deck_cards', deck_id = deck_id) }}">
                             Goto Cards
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="{{ url_for('main_cont.deckpage', id=deck_id) }}">
+                        <a class="nav-link active" href="{{ url_for('main_cont.deckpage', deck_id=deck_id) }}">
                             Goto Deck
                         </a>
                     </li>
@@ -70,7 +70,7 @@
                             {% endfor %}
                             {% endif %}
                             {% endwith %}
-                            <form action="{{ url_for('main_cont.updateCard', deck_id = deck_id, card_id = card_id) }}"
+                            <form action="{{ url_for('main_cont.update_card', deck_id = deck_id, card_id = card_id) }}"
                                 method="post">
                                 <div class="mb-3 pb-1" style="text-align: center;">
                                     <span class="h1 fw-bold mb-0">Update Card</span>

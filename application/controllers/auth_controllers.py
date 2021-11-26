@@ -1,11 +1,13 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash
-from flask_login import login_user, logout_user, login_required
+from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask_login import login_required, login_user, logout_user
 import requests
 
 from api.models import User
 
 auth = Blueprint("auth", __name__,
                  template_folder="../templates/auth_templates")
+
+# TODO change the part just after the request after fixing the api
 
 
 @auth.route("/login", methods=["GET", "POST"])

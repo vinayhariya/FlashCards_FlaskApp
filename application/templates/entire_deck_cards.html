@@ -33,7 +33,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="{{ url_for('main_cont.deckpage', id=deck_id) }}">
+                        <a class="nav-link active" href="{{ url_for('main_cont.deckpage', deck_id=deck_id) }}">
                             Goto Deck
                         </a>
                     </li>
@@ -60,9 +60,9 @@
 
                         {% if creator %}
 
-                        <a href="{{url_for('main_cont.updateCard', deck_id = deck_id, card_id = card['card_id']) }}"
+                        <a href="{{url_for('main_cont.update_card', deck_id = deck_id, card_id = card['card_id']) }}"
                             class="btn btn-warning">Edit</a>
-                        <a href="{{url_for('main_cont.deleteDeckCard', deck_id = deck_id, card_id = card['card_id']) }}"
+                        <a href="{{url_for('main_cont.delete_card', deck_id = deck_id, card_id = card['card_id']) }}"
                             class="btn btn-danger"
                             onclick="return confirm('Are you sure you want to delete this card?')">Delete</a>
                         {% endif %}
