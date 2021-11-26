@@ -33,7 +33,7 @@ Dashboard
 
 {% block main_section %}
 <section>
-    <p class="h1 mt-2 ms-4">Personal Decks</p>
+    <p class="h1 mt-2 ms-4" style="color: black;">Personal Decks</p>
 </section>
 <div class="container-fluid">
     {% if decks %}
@@ -63,8 +63,11 @@ Dashboard
     <p class="ms-2">There are no decks made.</p>
     {% endif %}
 
+    <br>
+
     <div class="container-fluid">
-        <table class="table table-bordered" style="margin-right: 10px; text-align: center;">
+        <table class="table table-bordered"
+            style="border: 2px black solid; background-color: white; text-align: center; margin-right: 10px;">
             <thead>
                 <th scope="col">#</th>
                 <th scope="col">Deck Name</th>
