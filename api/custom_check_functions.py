@@ -10,7 +10,9 @@ def check_username(username):
             error_message="username is required",
         )
 
-    return username.strip()
+    print(username.strip().title())
+
+    return username.strip().title()
 
 
 def check_password(password):

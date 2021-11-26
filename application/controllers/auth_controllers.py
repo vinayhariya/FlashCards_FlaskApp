@@ -27,6 +27,7 @@ def login():
         res = res.json()
 
         if res.get("status", None):  # logged in successfully
+            username = username.strip().title()
             user = User.query.filter(User.username == username).first()
             login_user(user, remember=remember)
             return redirect(url_for("main_cont.dashboard"))
