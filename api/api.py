@@ -487,7 +487,7 @@ class CardResource(Resource):
                 error_message='Back cannot be empty.')
 
         card = Card.query.filter((Card.deck_id == deck_id) & (
-            (Card.front == front) | (Card.back == back))).first()
+            (Card.front == front))).first()
 
         if card:
             raise NotAllowedError(
@@ -555,13 +555,6 @@ class CardResource(Resource):
             card.front = front
 
         if back:
-            c = Card.query.filter((Card.card_id != card_id) & (Card.deck_id == deck_id)
-                                  & (Card.back == back)).first()
-
-            if c:
-                raise NotAllowedError(
-                    error_message='Card back with same details is already present.')
-
             card.back = back
 
         db.session.add(card)
