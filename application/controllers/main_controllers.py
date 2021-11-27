@@ -188,7 +188,21 @@ def add_new_card(deck_id):
 @login_required
 def update_card(deck_id, card_id):
     if request.method == "GET":
-        return render_template("update_card.html", deck_id=deck_id, card_id=card_id)
+
+        res = requests.get(
+            f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/card_id={card_id}/get")
+
+        status_code = res.status_code
+        res = res.json()
+
+        if status_code != 200:
+            flash(res["error_message"], 'warning')
+            return redirect(url_for('main_cont.view_deck_cards', deck_id=deck_id))
+
+        card_front = res["card_front"]
+        card_back = res["card_back"]
+
+        return render_template("update_card.html", deck_id=deck_id, card_id=card_id, card_front=card_front, card_back=card_back)
     else:
         card_front = request.form.get("card_front")
         card_back = request.form.get("card_back")

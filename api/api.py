@@ -204,9 +204,15 @@ class DeckResource(Resource):
         deckname = args["deckname"]
         public = args["public"]
 
+        if isinstance(deckname, str):
+            deckname = deckname.strip()
+
         if not checkUserValid(user_id=user_id, api_key=api_key):
             raise UnauthenticatedUserError(
                 error_message="Invalid API User Credentials")
+
+        if not deckname:
+            raise NotAllowedError(error_message="Deckname should not be empty")
 
         deck_present = Deck.query.filter(
             (Deck.author_id == user_id) & (Deck.deckname == deckname)).first()
@@ -238,6 +244,9 @@ class DeckResource(Resource):
         deck_id = args["deck_id"]
         deckname = args["deckname"]
         public = args["public"]
+
+        if isinstance(deckname, str):
+            deckname = deckname.strip()
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
             raise UnauthenticatedUserError(
@@ -408,6 +417,12 @@ class CardResource(Resource):
         front = args["front"]
         back = args["back"]
 
+        if isinstance(front, str):
+            front = front.strip()
+
+        if isinstance(back, str):
+            back = back.strip()
+
         if not checkUserValid(user_id=user_id, api_key=api_key):
             raise UnauthenticatedUserError(
                 error_message="Invalid API User Credentials")
@@ -421,6 +436,14 @@ class CardResource(Resource):
                     error_message='Deck does not exist for this user.')
             else:
                 raise DoesNotExistError(error_message='Deck does not exist.')
+
+        if not front:
+            raise NotAllowedError(
+                    error_message='Front cannot be empty.')
+
+        if not back:
+            raise NotAllowedError(
+                    error_message='Back cannot be empty.')
 
         card = Card.query.filter((Card.deck_id == deck_id) & (
             (Card.front == front) | (Card.back == back))).first()
@@ -454,6 +477,14 @@ class CardResource(Resource):
         front = args["front"]
         back = args["back"]
 
+        if isinstance(front, str):
+            front = front.strip()
+
+        if isinstance(back, str):
+            back = back.strip()
+
+        print(f'Front{front}, Back{back}.')
+
         if not checkUserValid(user_id=user_id, api_key=api_key):
             raise UnauthenticatedUserError(
                 error_message="Invalid API User Credentials")
@@ -469,7 +500,7 @@ class CardResource(Resource):
                 error_message='Card does not exist for this user.')
 
         if front:
-            c = Card.query.filter((Card.deck_id == deck_id)
+            c = Card.query.filter((Card.card_id != card_id) & (Card.deck_id == deck_id)
                                   & (Card.front == front)).first()
             if c:
                 raise NotAllowedError(
@@ -478,7 +509,7 @@ class CardResource(Resource):
             card.front = front
 
         if back:
-            c = Card.query.filter((Card.deck_id == deck_id)
+            c = Card.query.filter((Card.card_id != card_id) & (Card.deck_id == deck_id)
                                   & (Card.back == back)).first()
 
             if c:
