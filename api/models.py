@@ -113,7 +113,7 @@ class Feedback(db.Model):
 @event.listens_for(Feedback.__table__, 'after_create')
 def create_departments(*args, **kwargs):
     db.session.add(Feedback(feedback_desc="Easy", score=3))
-    db.session.add(Feedback(feedback_desc="Medium", score=1))
-    db.session.add(Feedback(feedback_desc="Difficult", score=0))
+    db.session.add(Feedback(feedback_desc="Medium", score=2))
+    db.session.add(Feedback(feedback_desc="Difficult", score=1))
     db.session.commit()
 # above method is used only when a new database file is generated and the feedback table as to be filled
