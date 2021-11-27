@@ -112,3 +112,10 @@ The website and API are accessible [here](https://flashcards.vinayhariya.repl.co
 Credentials for login (without registering - for website viewing purpose to gain full understanding of the website):
 
 - user name is ``` Jack Bauer``` and the password is ```abcd1234```
+
+<br>
+<br>
+
+## Database Schema
+
+[![database-schema-1.png](https://i.postimg.cc/85Y0GCXw/database-schema-1.png)](https://postimg.cc/MMyDbzSj)
