@@ -3,7 +3,21 @@ info:
   title: Flash Cards API
   version: 1.0.0
   description: |
-    A simple API documentation that helps in understaning the API properly. TODO, add proper description here.
+    #### Simple API documentation that helps in understanding the Flash Card API properly.
+    
+    This API can be used alone and also is also used to power the [Flash Cards website](https://flashcards.vinayhariya.repl.co/login)
+    created by Vinay Vinod Hariya as part of the Modern Application Development 1 of the IIT BSc. Degree in Programming and Data Science.
+    
+    - The UserLogin and UserRegister are part of the authentication.
+    - UserDeckList and DeckCardList return lists of the Decks and Cards respectively.
+    - DeckResource and CardResource are used to perfrom CRUD actions on the decks and cards respectively.
+    - PublicDecks return list of decks that can be accessed by all the users (authenticated)
+    - UserDeckScore returns the score of a single deck with its attemps by the user
+    - UserDeckAttempted returns list of all the decks attempted along with the score
+    - StudyCard is used for getting the card information and adding the feedback in the database
+    - PublicDeckRelatedAuthor returns the list of public decks related to the specified author
+    
+    **[Only Test on Insomnia]** **(Not on Swagger)**
 servers:
   - url: http://127.0.0.1:8000/
     description: Local Host Server (API Testing)
