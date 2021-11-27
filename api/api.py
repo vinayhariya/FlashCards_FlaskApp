@@ -2,8 +2,8 @@ from flask_restful import Resource
 from api.models import Card, Deck, Feedback, PerCard, SolvingDeck, User
 from api.database import db
 from api.validation import DoesNotExistError, LoginError, NotAllowedError, UnauthenticatedUserError
-from api.custom_parsers import *
-from api.custom_check_functions import *
+from api.custom_parsers import login_user_parser, register_user_parser, deck_creation_parser, deck_updation_parser, card_creation_parser, card_updation_parser, solving_deck_parser
+from api.custom_check_functions import check_username, check_password, check_email, checkUserValid
 import secrets
 from datetime import datetime
 from sqlalchemy import desc

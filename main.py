@@ -3,7 +3,7 @@ from flask_restful import Api
 from flask_login import LoginManager
 from sqlalchemy_utils import database_exists
 
-from api.api import *
+from api.api import UserLoginAPI, UserRegisterAPI, UserDeckList, DeckResource, DeckCardList, CardResource, PublicDecks, UserDeckScore, UserDeckAttempted, StudyCard, PublicDeckAuthorRelated
 from api.database import db  # importing SQLAlchemy instance
 from api.models import User
 
