@@ -1,0 +1,1506 @@
+openapi: 3.0.0
+info:
+  title: Flash Cards API
+  version: 1.0.0
+  description: |
+    A simple API documentation that helps in understaning the API properly. TODO, add proper description here.
+servers:
+  - url: http://127.0.0.1:8000/
+    description: Local Host Server (API Testing)
+  - url: https://flashcards.vinayhariya.repl.co/
+    description: Production Server (Live API)
+paths:
+  /api/user/user_id={user_id}/get:
+    get:
+      tags:
+        - UserLogin
+      description: To get the credentials of the user requested
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                title: response object
+                type: object
+                properties:
+                  user_id:
+                    type: integer
+                    example: 1
+                  username:
+                    type: string
+                    example: John
+                  email:
+                    type: string
+                    example: johndoe@gmail.com
+        '404':
+          description: DoesNotExistError.
+          content:
+            application/json:
+              schema:
+                title: error object
+                type: object
+                properties:
+                  status_code:
+                    type: integer
+                    example: 404
+                  error_message:
+                    type: string
+                    example: "User with user_id = ? does not exist."
+  /api/user/login:
+    post:
+      tags:
+        - UserLogin
+      description: To securly check the credentials of the user
+      parameters:
+        - in: query
+          name: username
+          required: true
+          schema:
+            type: string
+            example: "John"
+        - in: query
+          name: password
+          required: true
+          schema:
+            type: string
+            example: "password@1234"
+      responses:
+          '200':
+            description: Success
+            content:
+              application/json:
+                schema:
+                  title: response object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 200
+                    logged_in:
+                      type: boolean
+                      example: true
+                    api_key:
+                      type: string
+                      example: "IlRN5GwYAOnOQZiQDGV4dg"
+          '401':
+            description: LoginError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 401
+                    error_message:
+                      type: string
+                      example: "Invalid login details !"
+  /api/user/register:
+    post:
+      tags:
+        - UserRegister
+      description: To securly create a new user
+      parameters:
+        - in: query
+          name: username
+          required: true
+          schema:
+            type: string
+            example: "John"
+        - in: query
+          name: password
+          required: true
+          schema:
+            type: string
+            example: "password@1234"
+        - in: query
+          name: email
+          required: true
+          schema:
+            type: string
+            example: "johndoe@gmail.com"     
+      responses:
+          '201':
+            description: Success
+            content:
+              application/json:
+                schema:
+                  title: response object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 201
+                    message:
+                      type: string
+                      example: "User registered successfully"
+          '403':
+            description: NotAllowedError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 403
+                    error_message:
+                      type: string
+                      example: "Username is taken. Use another username."
+  /api/user_id={user_id}/api_key={api_key}/decksList:
+    get:
+      tags:
+        - UserDeckList
+      description: For getting the list of decks created by the user
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: path
+          name: api_key
+          required: true
+          schema:
+            type: string
+            example: "IlRN5GwYAOnOQZiQDGV4dg"
+      responses:
+          '200':
+            description: Success
+            content:
+              application/json:
+                schema:
+                  title: response object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 200
+                    user_id:
+                      type: integer
+                      example: 1
+                    no_of_decks:
+                      type: integer
+                      example: 1
+                    decks:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          deck_id:
+                            type: integer
+                            example: 1
+                          deck_name:
+                            type: string
+                            example: "English to Hindi"
+                          public:
+                            type: boolean
+                            example: true
+                          no_of_cards:
+                            type: integer
+                            example: 15
+          '401':
+            description: UnauthenticatedUserError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 401
+                    error_message:
+                      type: string
+                      example: "Invalid API User Credentials."  
+  /api/user_id={user_id}/api_key={api_key}/deck_id={deck_id}/get:
+    get:
+      tags:
+        - DeckResource
+      description: Used to get information about a certain deck such as its creator, name, visibilty to the public, number of cards. (READ)
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: path
+          name: api_key
+          required: true
+          schema:
+            type: string
+            example: "IlRN5GwYAOnOQZiQDGV4dg"
+        - in: path
+          name: deck_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+          '200':
+            description: Success
+            content:
+              application/json:
+                schema:
+                  title: response object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 201
+                    creator:
+                      type: boolean
+                      example: true
+                    deck_id:
+                      type: integer
+                      example: 1
+                    deck_author:
+                      type: string
+                      example: "John"
+                    deck_name:
+                      type: string
+                      example: "English to Hindi"
+                    public:
+                      type: boolean
+                      example: true
+                    no_of_cards:
+                      type: integer
+                      example: 15
+          '401':
+            description: UnauthenticatedUserError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 401
+                    error_message:
+                      type: string
+                      example: "Invalid API User Credentials."  
+          '403':
+            description: NotAllowedError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 403
+                    error_message:
+                      type: string
+                      example: "Deck does not exist for this user."
+          '404':
+            description: DoesNotExistError.
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 404
+                    error_message:
+                      type: string
+                      example: "Deck does not exist."
+  /api/deck/add:
+    post:
+      tags:
+        - DeckResource
+      description: Used to enter into of a new deck into the database (CREATE) 
+      parameters:
+        - in: query
+          name: user_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: query
+          name: api_key
+          required: true
+          schema:
+            type: string
+            example: "IlRN5GwYAOnOQZiQDGV4dg"
+        - in: query
+          name: deckname
+          required: true
+          schema:
+            type: string
+            example: "Movies" 
+        - in: query
+          name: public
+          required: true
+          schema:
+            type: string
+            example: "on"
+      responses:
+          '201':
+            description: Success
+            content:
+              application/json:
+                schema:
+                  title: response object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 201
+                    message:
+                      type: string
+                      example: "Deck created successfully"
+          '401':
+            description: UnauthenticatedUserError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 401
+                    error_message:
+                      type: string
+                      example: "Invalid API User Credentials."  
+          '403':
+            description: NotAllowedError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 403
+                    error_message:
+                      type: string
+                      example: "Deck with same name is already present."
+  /api/deck/update:
+    put:
+      tags:
+        - DeckResource
+      description: Used for updating the information of the exisiting deck (UPDATE)
+      parameters:
+        - in: query
+          name: user_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: query
+          name: api_key
+          required: true
+          schema:
+            type: string
+            example: "IlRN5GwYAOnOQZiQDGV4dg"
+        - in: query
+          name: deck_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: query
+          name: deckname
+          required: true
+          schema:
+            type: string
+            example: "Movies" 
+        - in: query
+          name: public
+          required: true
+          schema:
+            type: string
+            example: "on"
+      responses:
+          '201':
+            description: Success
+            content:
+              application/json:
+                schema:
+                  title: response object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 201
+                    message:
+                      type: string
+                      example: "Deck updated successfully"
+          '401':
+            description: UnauthenticatedUserError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 401
+                    error_message:
+                      type: string
+                      example: "Invalid API User Credentials."  
+          '403':
+            description: NotAllowedError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 403
+                    error_message:
+                      type: string
+                      example: "Deck with same name is already present."
+          '404':
+            description: DoesNotExistError.
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 404
+                    error_message:
+                      type: string
+                      example: "Deck does not exist."                        
+  /api/user_id={user_id}/api_key={api_key}/deck_id={deck_id}/delete:
+    delete:
+      tags:
+        - DeckResource
+      description: Used to delete the specific deck requested (DELETE)
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: path
+          name: api_key
+          required: true
+          schema:
+            type: string
+            example: "IlRN5GwYAOnOQZiQDGV4dg"
+        - in: path
+          name: deck_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+          '200':
+            description: Success
+            content:
+              application/json:
+                schema:
+                  title: response object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 200
+                    message:
+                      type: string
+                      example: "Deck deleted successfully"
+          '401':
+            description: UnauthenticatedUserError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 401
+                    error_message:
+                      type: string
+                      example: "Invalid API User Credentials."  
+          '403':
+            description: NotAllowedError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 403
+                    error_message:
+                      type: string
+                      example: "Deck does not exist for this user."
+          '404':
+            description: DoesNotExistError.
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 404
+                    error_message:
+                      type: string
+                      example: "Deck does not exist."
+  /api/user_id={user_id}/api_key={api_key}/deck_id={deck_id}/cardsList:
+    get:
+      tags:
+        - DeckCardList
+      description: Used to get the list of cards of a particular deck
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: path
+          name: api_key
+          required: true
+          schema:
+            type: string
+            example: "IlRN5GwYAOnOQZiQDGV4dg"
+        - in: path
+          name: deck_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+          '200':
+            description: Success
+            content:
+              application/json:
+                schema:
+                  title: response object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 200
+                    creator:
+                      type: boolean
+                      example: true
+                    deck_id:
+                      type: integer
+                      example: 1
+                    deck_name:
+                      type: string
+                      example: "English to Hindi"
+                    public:
+                      type: boolean
+                      example: true
+                    no_of_cards:
+                      type: integer
+                      example: 15
+                    cards:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          card_id:
+                            type: integer
+                            example: 1
+                          front:
+                            type: string
+                            example: "Dog"
+                          back:
+                            type: string
+                            example: "कुत्ता"
+          '401':
+            description: UnauthenticatedUserError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 401
+                    error_message:
+                      type: string
+                      example: "Invalid API User Credentials."  
+          '403':
+            description: NotAllowedError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 403
+                    error_message:
+                      type: string
+                      example: "Deck does not exist for this user."
+          '404':
+            description: DoesNotExistError.
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 404
+                    error_message:
+                      type: string
+                      example: "Deck does not exist."
+  /api/user_id={user_id}/api_key={api_key}/card_id={card_id}/get:
+    get:
+      tags:
+        - CardResource
+      description: Used to get a particular card created by user or part of a public deck (READ)
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: path
+          name: api_key
+          required: true
+          schema:
+            type: string
+            example: "IlRN5GwYAOnOQZiQDGV4dg"
+        - in: path
+          name: card_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+          '200':
+            description: Success
+            content:
+              application/json:
+                schema:
+                  title: response object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 200
+                    creator:
+                      type: boolean
+                      example: true
+                    deck_id:
+                      type: integer
+                      example: 1
+                    deck_name:
+                      type: string
+                      example: "English to Hindi"
+                    card_id:
+                      type: integer
+                      example: 1
+                    card_front:
+                      type: string
+                      example: "Dog"
+                    card_back:
+                      type: string
+                      example: "कुत्ता"
+          '401':
+            description: UnauthenticatedUserError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 401
+                    error_message:
+                      type: string
+                      example: "Invalid API User Credentials."  
+          '403':
+            description: NotAllowedError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 403
+                    error_message:
+                      type: string
+                      example: "Card does not exist for this user."
+          '404':
+            description: DoesNotExistError.
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 404
+                    error_message:
+                      type: string
+                      example: "Card does not exist."
+  /api/deck/card/add:
+    post:
+      tags:
+        - CardResource
+      description: Used to enter into of a new deck into the database (CREATE) 
+      parameters:
+        - in: query
+          name: user_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: query
+          name: api_key
+          required: true
+          schema:
+            type: string
+            example: "IlRN5GwYAOnOQZiQDGV4dg"
+        - in: query
+          name: deck_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: query
+          name: front
+          required: true
+          schema:
+            type: string
+            example: "Dog"
+        - in: query
+          name: back
+          required: true
+          schema:
+            type: string
+            example: "कुत्ता"
+      responses:
+          '201':
+            description: Success
+            content:
+              application/json:
+                schema:
+                  title: response object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 201
+                    message:
+                      type: string
+                      example: "Card added successfully"
+          '401':
+            description: UnauthenticatedUserError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 401
+                    error_message:
+                      type: string
+                      example: "Invalid API User Credentials."  
+          '403':
+            description: NotAllowedError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 403
+                    error_message:
+                      type: string
+                      example: "Front cannot be empty." 
+          '404':
+            description: DoesNotExistError.
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 404
+                    error_message:
+                      type: string
+                      example: "Deck does not exist."
+  /api/deck/card/update:
+    put:
+      tags:
+        - CardResource
+      description: Used to update a particular card of a deck (UPDATE)
+      parameters:
+        - in: query
+          name: user_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: query
+          name: api_key
+          required: true
+          schema:
+            type: string
+            example: "IlRN5GwYAOnOQZiQDGV4dg"
+        - in: query
+          name: deck_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: query
+          name: card_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: query
+          name: front
+          required: true
+          schema:
+            type: string
+            example: "Dog"
+        - in: query
+          name: back
+          required: true
+          schema:
+            type: string
+            example: "कुत्ता"
+      responses:
+          '201':
+            description: Success
+            content:
+              application/json:
+                schema:
+                  title: response object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 201
+                    message:
+                      type: string
+                      example: "Card updated successfully"
+          '401':
+            description: UnauthenticatedUserError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 401
+                    error_message:
+                      type: string
+                      example: "Invalid API User Credentials."  
+          '403':
+            description: NotAllowedError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 403
+                    error_message:
+                      type: string
+                      example: "Card front with same details is already present." 
+          '404':
+            description: DoesNotExistError.
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 404
+                    error_message:
+                      type: string
+                      example: "Card does not exist."
+  /api/user_id={user_id}/api_key={api_key}/deck_id={deck_id}/card_id={card_id}/delete:
+    delete:
+      tags:
+        - CardResource
+      description: Used to delete the specific deck requested (DELETE)
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: path
+          name: api_key
+          required: true
+          schema:
+            type: string
+            example: "IlRN5GwYAOnOQZiQDGV4dg"
+        - in: path
+          name: deck_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: path
+          name: card_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+          '200':
+            description: Success
+            content:
+              application/json:
+                schema:
+                  title: response object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 200
+                    message:
+                      type: string
+                      example: "Card deleted successfully"
+          '401':
+            description: UnauthenticatedUserError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 401
+                    error_message:
+                      type: string
+                      example: "Invalid API User Credentials."  
+          '403':
+            description: NotAllowedError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 403
+                    error_message:
+                      type: string
+                      example: "Card does not exist for this user."
+          '404':
+            description: DoesNotExistError.
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 404
+                    error_message:
+                      type: string
+                      example: "Card does not exist."
+  /api/user_id={user_id}/api_key={api_key}/publicDecks:
+    get:
+      tags:
+        - PublicDecks
+      description: To get all the public decks available
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: path
+          name: api_key
+          required: true
+          schema:
+            type: string
+            example: "IlRN5GwYAOnOQZiQDGV4dg"
+      responses:
+          '200':
+            description: Success
+            content:
+              application/json:
+                schema:
+                  title: response object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 200              
+                    no_of_decks:
+                      type: integer
+                      example: 1
+                    decks:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          deck_id:
+                            type: integer
+                            example: 1
+                          deck_name:
+                            type: string
+                            example: "English to Hindi"
+                          public:
+                            type: boolean
+                            example: true
+                          no_of_cards:
+                            type: integer
+                            example: 15
+                          author:
+                            type: string
+                            example: "John"
+          '401':
+            description: UnauthenticatedUserError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 401
+                    error_message:
+                      type: string
+                      example: "Invalid API User Credentials."
+  /api/user_id={user_id}/api_key={api_key}/deck_id={deck_id}/score/get:
+    get:
+      tags:
+        - UserDeckScore
+      description: To get all the scores made by the user of a specific deck in order of the latest attempt
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: path
+          name: api_key
+          required: true
+          schema:
+            type: string
+            example: "IlRN5GwYAOnOQZiQDGV4dg"
+        - in: path
+          name: deck_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+          '200':
+            description: Success
+            content:
+              application/json:
+                schema:
+                  title: response object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 200              
+                    user_id:
+                      type: integer
+                      example: 1
+                    deck_id:
+                      type: integer
+                      example: 1
+                    rows:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          date:
+                            type: string                            
+                            example: "2021-11-24 08:36:57.164687"
+                          start_time:
+                            type: string                            
+                            example: "08:36:57.164687"
+                          time_taken:
+                            type: number
+                            format: float
+                            example: 1.5
+                          total_score:
+                            type: integer
+                            example: 15                   
+          '401':
+            description: UnauthenticatedUserError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 401
+                    error_message:
+                      type: string
+                      example: "Invalid API User Credentials."
+  /api/user_id={user_id}/api_key={api_key}/decks_attempted/get:
+    get:
+      tags:
+        - UserDeckAttempted
+      description: To get all the decks attempted by the user order of the latest attempt
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: path
+          name: api_key
+          required: true
+          schema:
+            type: string
+            example: "IlRN5GwYAOnOQZiQDGV4dg"
+      responses:
+          '200':
+            description: Success
+            content:
+              application/json:
+                schema:
+                  title: response object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 200              
+                    user_id:
+                      type: integer
+                      example: 1                  
+                    decks_attempted:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          creator:
+                            type: boolean                            
+                            example: true
+                          deck_id:
+                            type: integer
+                            example: 1
+                          public:
+                            type: boolean                            
+                            example: true
+                          deckname:
+                            type: string                            
+                            example: "English to Hindi"
+                          date:
+                            type: string                            
+                            example: "2021-11-24 08:36:57.164687"
+                          auhtor:
+                            type: string                            
+                            example: "John"
+                          total_score:
+                            type: integer
+                            example: 15                   
+          '401':
+            description: UnauthenticatedUserError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 401
+                    error_message:
+                      type: string
+                      example: "Invalid API User Credentials."
+  /api/user_id={user_id}/api_key={api_key}/deck_id={deck_id}/card_id={card_id}/study/get:
+    get:
+      tags:
+        - StudyCard
+      description: Used to get a particular card created by user or part of a public deck (READ)
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: path
+          name: api_key
+          required: true
+          schema:
+            type: string
+            example: "IlRN5GwYAOnOQZiQDGV4dg"
+        - in: path
+          name: deck_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: path
+          name: card_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+          '200':
+            description: Success
+            content:
+              application/json:
+                schema:
+                  title: response object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 200
+                    card:
+                      type: object
+                      properties:
+                        card_id:
+                          type: integer
+                          example: 1                
+                    front:
+                      type: string
+                      example: "Dog"
+                    back:
+                      type: string
+                      example: "कुत्ता"
+                    message:
+                      type: string
+                      example: "Finished Deck, Score updated in the table"
+          '401':
+            description: UnauthenticatedUserError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 401
+                    error_message:
+                      type: string
+                      example: "Invalid API User Credentials."  
+          '403':
+            description: NotAllowedError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 403
+                    error_message:
+                      type: string
+                      example: "Error in Studying Card"        
+  /api/deck/study:
+    post:
+      tags:
+        - StudyCard
+      description: Used to enter into of a new deck into the database (CREATE) 
+      parameters:
+        - in: query
+          name: user_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: query
+          name: api_key
+          required: true
+          schema:
+            type: string
+            example: "IlRN5GwYAOnOQZiQDGV4dg"
+        - in: query
+          name: deck_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: query
+          name: card_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: query
+          name: solve_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: query
+          name: feedback
+          required: true
+          schema:
+            type: string
+            example: "Medium"
+      responses:
+          '200':
+            description: Success
+            content:
+              application/json:
+                schema:
+                  title: response object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 200
+                    solve_id:
+                      type: integer
+                      example: 1
+                    card:
+                      type: object
+                      properties:
+                        card_id:
+                          type: integer
+                          example: 1
+                        front:
+                          type: string
+                          example: "Dog"
+                        back:
+                          type: string
+                          example: "कुत्ता"                       
+          '401':
+            description: UnauthenticatedUserError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 401
+                    error_message:
+                      type: string
+                      example: "Invalid API User Credentials."
+  /api/user_id={user_id}/api_key={api_key}/publicDecks/author={author_name}/get:
+    get:
+      tags:
+        - PublicDeckAuthorRelated
+      description: To get all the decks attempted by the user order of the latest attempt
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - in: path
+          name: api_key
+          required: true
+          schema:
+            type: string
+            example: "IlRN5GwYAOnOQZiQDGV4dg"
+        - in: path
+          name: author_name
+          required: true
+          schema:
+            type: string
+            example: "John"
+      responses:
+          '200':
+            description: Success
+            content:
+              application/json:
+                schema:
+                  title: response object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 200
+                    no_of_decks:
+                      type: integer
+                      example: 4
+                    decks:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          deck_id:
+                            type: integer
+                            example: 1
+                          deck_name:
+                            type: string
+                            example: "English to Hindi"
+                          public:
+                            type: boolean
+                            example: true
+                          no_of_cards:
+                            type: integer
+                            example: 15
+                    author:
+                      type: string
+                      example: "John"
+          '401':
+            description: UnauthenticatedUserError
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 401
+                    error_message:
+                      type: string
+                      example: "Invalid API User Credentials."                      

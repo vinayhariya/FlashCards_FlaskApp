@@ -97,6 +97,6 @@ api.add_resource(PublicDeckAuthorRelated,
 
 if __name__ == "__main__":
 
-    # app.run(host="127.0.0.1", port=8000)  # if running on localhost
+    app.run(host="127.0.0.1", port=8000)  # if running on localhost
 
-    app.run(host="0.0.0.0", port=8080)  # if running on replit
+    # app.run(host="0.0.0.0", port=8080)  # if running on replit
