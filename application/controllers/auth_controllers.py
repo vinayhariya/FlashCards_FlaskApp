@@ -3,6 +3,7 @@ from flask_login import login_required, login_user, logout_user
 import requests
 
 from api.models import User
+from application.config import HOST
 
 auth = Blueprint("auth", __name__,
                  template_folder="../templates/auth_templates")
@@ -20,7 +21,7 @@ def login():
 
         data = {"username": username, "password": password}
 
-        res = requests.post("http://127.0.0.1:8000/api/user/login", data)
+        res = requests.post(f"{HOST}/api/user/login", data)
 
         status_code = res.status_code
         res = res.json()
@@ -53,7 +54,7 @@ def signup():
             "password": password,
         }
 
-        res = requests.post("http://127.0.0.1:8000/api/user/register", data)
+        res = requests.post(f"{HOST}/api/user/register", data)
 
         status_code = res.status_code
         res = res.json()

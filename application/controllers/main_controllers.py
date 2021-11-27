@@ -1,6 +1,7 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for, session
 from flask_login import login_required, current_user
 import requests
+from application.config import HOST
 
 main_cont = Blueprint("main_cont", __name__,
                       template_folder="../templates", static_folder="../static")
@@ -18,7 +19,7 @@ def index():
 def dashboard():
 
     res = requests.get(
-        f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/decksList")
+        f"{HOST}/api/user_id={current_user.user_id}/api_key={current_user.api_key}/decksList")
 
     status_code = res.status_code
     res = res.json()
@@ -27,7 +28,7 @@ def dashboard():
         return f'{res["error_message"]}'
 
     attempted_res = requests.get(
-        f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/decks_attempted/get")
+        f"{HOST}/api/user_id={current_user.user_id}/api_key={current_user.api_key}/decks_attempted/get")
 
     status_code = attempted_res.status_code
     attempted_res = attempted_res.json()
@@ -43,7 +44,7 @@ def dashboard():
 def deckpage(deck_id):
 
     res = requests.get(
-        f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={deck_id}/get")
+        f"{HOST}/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={deck_id}/get")
 
     status_code = res.status_code
     res = res.json()
@@ -53,7 +54,7 @@ def deckpage(deck_id):
         return redirect(url_for("main_cont.dashboard"))
 
     past_attempt_res = requests.get(
-        f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={deck_id}/score/get")
+        f"{HOST}/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={deck_id}/score/get")
 
     status_code = past_attempt_res.status_code
     past_attempt_res = past_attempt_res.json()
@@ -81,7 +82,7 @@ def add_new_deck():
             "public": public
         }
 
-        res = requests.post("http://127.0.0.1:8000/api/deck/add", data)
+        res = requests.post(f"{HOST}/api/deck/add", data)
 
         status_code = res.status_code
         res = res.json()
@@ -99,7 +100,7 @@ def add_new_deck():
 def updateDeck(deck_id):
     if request.method == "GET":
         res = requests.get(
-            f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={deck_id}/get")
+            f"{HOST}/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={deck_id}/get")
 
         status_code = res.status_code
         res = res.json()
@@ -123,7 +124,7 @@ def updateDeck(deck_id):
             "deck_id": deck_id
         }
 
-        res = requests.put("http://127.0.0.1:8000/api/deck/update", data)
+        res = requests.put(f"{HOST}/api/deck/update", data)
 
         status_code = res.status_code
         res = res.json()
@@ -141,7 +142,7 @@ def updateDeck(deck_id):
 def deleteDeck(deck_id):
 
     res = requests.delete(
-        f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={deck_id}/delete")
+        f"{HOST}/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={deck_id}/delete")
 
     status_code = res.status_code
     res = res.json()
@@ -171,7 +172,7 @@ def add_new_card(deck_id):
             "back": card_back
         }
 
-        res = requests.post("http://127.0.0.1:8000/api/deck/card/add", data)
+        res = requests.post(f"{HOST}/api/deck/card/add", data)
 
         status_code = res.status_code
         res = res.json()
@@ -190,7 +191,7 @@ def update_card(deck_id, card_id):
     if request.method == "GET":
 
         res = requests.get(
-            f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/card_id={card_id}/get")
+            f"{HOST}/api/user_id={current_user.user_id}/api_key={current_user.api_key}/card_id={card_id}/get")
 
         status_code = res.status_code
         res = res.json()
@@ -216,7 +217,7 @@ def update_card(deck_id, card_id):
             "back": card_back
         }
 
-        res = requests.put("http://127.0.0.1:8000/api/deck/card/update", data)
+        res = requests.put(f"{HOST}/api/deck/card/update", data)
 
         status_code = res.status_code
         res = res.json()
@@ -234,7 +235,7 @@ def update_card(deck_id, card_id):
 def delete_card(deck_id, card_id):
 
     res = requests.delete(
-        f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={deck_id}/card_id={card_id}/delete")
+        f"{HOST}/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={deck_id}/card_id={card_id}/delete")
 
     status_code = res.status_code
     res = res.json()
@@ -251,7 +252,7 @@ def delete_card(deck_id, card_id):
 @login_required
 def view_deck_cards(deck_id):
     res = requests.get(
-        f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={deck_id}/cardsList")
+        f"{HOST}/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={deck_id}/cardsList")
 
     status_code = res.status_code
     res = res.json()
@@ -271,7 +272,7 @@ def view_deck_cards(deck_id):
 @login_required
 def public_decks():
     res = requests.get(
-        f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/publicDecks")
+        f"{HOST}/api/user_id={current_user.user_id}/api_key={current_user.api_key}/publicDecks")
 
     status_code = res.status_code
     res = res.json()
@@ -298,7 +299,7 @@ def studyCard(deck_id, card_id):
             "feedback": feedback
         }
 
-        res = requests.post("http://127.0.0.1:8000/api/deck/study", data)
+        res = requests.post(f"{HOST}/api/deck/study", data)
 
         if res.status_code != 200:
             flash(res["error_message"], 'warning')
@@ -319,7 +320,7 @@ def studyCard(deck_id, card_id):
         return render_template('study_card.html', card=res["card"], deck_id=deck_id, card_id=card_id)
     else:
         res = requests.get(
-            f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={deck_id}/card_id={card_id}/study/get")
+            f"{HOST}/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={deck_id}/card_id={card_id}/study/get")
 
         if res.status_code != 200:
             flash(res["error_message"], 'warning')
@@ -343,7 +344,7 @@ def studyCard(deck_id, card_id):
 @login_required
 def author_public_decks(author_name):
     res = requests.get(
-        f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/publicDecks/author={author_name}/get")
+        f"{HOST}/api/user_id={current_user.user_id}/api_key={current_user.api_key}/publicDecks/author={author_name}/get")
 
     if res.status_code != 200:
         flash(res["error_message"], 'warning')
