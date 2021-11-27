@@ -251,8 +251,8 @@ class DeckResource(Resource):
 
         if deckname:
 
-            duplicate_deck_name = Deck.query.filter(
-                (Deck.author_id == user_id) & (Deck.deckname == deckname)).first()
+            duplicate_deck_name = Deck.query.filter((Deck.deck_id != deck_id) & (
+                Deck.author_id == user_id) & (Deck.deckname == deckname)).first()
 
             if duplicate_deck_name:  # if a deck with that name already exists
                 raise NotAllowedError(

@@ -98,7 +98,19 @@ def add_new_deck():
 @login_required
 def updateDeck(deck_id):
     if request.method == "GET":
-        return render_template("update_deck.html", deck_id=deck_id)
+        res = requests.get(
+            f"http://127.0.0.1:8000/api/user_id={current_user.user_id}/api_key={current_user.api_key}/deck_id={deck_id}/get")
+
+        status_code = res.status_code
+        res = res.json()
+
+        if status_code != 200:
+            flash(res["error_message"], 'warning')
+            return redirect(url_for("main_cont.deckpage"))
+
+        deckname = res["deck_name"]
+
+        return render_template("update_deck.html", deck_id=deck_id, deckname=deckname)
     else:
         deckname = request.form.get("deckname")
         public = request.form.get("public")
