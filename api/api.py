@@ -8,8 +8,6 @@ import secrets
 from datetime import datetime
 from sqlalchemy import desc
 
-# TODO fill in the proper doc strinngs
-
 
 class UserLoginAPI(Resource):
     """
@@ -22,8 +20,11 @@ class UserLoginAPI(Resource):
         Args:
             user_id (int): id of the user (used in the database)
 
+        Raises:
+            DoesNotExistError: User id does not exist
+
         Returns:
-            [type]: [description]
+            json response
         """
         user = User.query.filter(User.user_id == user_id).first()
 
@@ -41,10 +42,10 @@ class UserLoginAPI(Resource):
         """To securly check the credentials of the user
 
         Raises:
-            BusinessValidationError: In case of mismatch of details
+            LoginError
 
         Returns:
-            [type]: [description]
+            json response
         """
         args = login_user_parser.parse_args()
         username = check_username(args["username"])
@@ -73,10 +74,10 @@ class UserRegisterAPI(Resource):
         """Creating a new user
 
         Raises:
-            BusinessValidationError: if the details are duplicate
+            NotAllowedError
 
         Returns:
-            [type]: [description]
+            json response
         """
         args = register_user_parser.parse_args()
         username = check_username(args["username"])
@@ -123,6 +124,12 @@ class UserDeckList(Resource):
         Args:
             user_id (int): id of the user (used in the database)
             api_key (string - 16 chars): used for user api auth everytime a request is made
+
+        Raises:
+            UnauthenticatedUserError
+
+        Returns:
+            json response
         """
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
@@ -161,8 +168,13 @@ class DeckResource(Resource):
             api_key (string - 16 chars): used for user api auth everytime a request is made
             deck_id (int): id of the specific deck requested
 
+        Raises:
+            UnauthenticatedUserError,
+            NotAllowedError,
+            DoesNotExistError
+
         Returns:
-            [type]: [description]
+            json response
         """
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
@@ -194,8 +206,12 @@ class DeckResource(Resource):
     def post(self):
         """Used to enter into of a new deck into the database (CREATE) 
 
+        Raises:
+            UnauthenticatedUserError,
+            NotAllowedError
+
         Returns:
-            [type]: [description]
+            json response
         """
         args = deck_creation_parser.parse_args()
 
@@ -234,8 +250,13 @@ class DeckResource(Resource):
     def put(self):
         """Used for updating the information of the exisiting deck (UPDATE)
 
+        Raises:
+            UnauthenticatedUserError,
+            NotAllowedError,
+            DoesNotExistError
+
         Returns:
-            [type]: [description]
+            json response
         """
         args = deck_updation_parser.parse_args()
 
@@ -287,8 +308,13 @@ class DeckResource(Resource):
             api_key (string - 16 chars): used for user api auth everytime a request is made
             deck_id (int): id of the specific deck requested
 
+        Raises:
+            UnauthenticatedUserError,
+            NotAllowedError,
+            DoesNotExistError
+
         Returns:
-            [type]: [description]
+            json response
         """
         if not checkUserValid(user_id=user_id, api_key=api_key):
             raise UnauthenticatedUserError(
@@ -323,8 +349,13 @@ class DeckCardList(Resource):
             api_key (string - 16 chars): used for user api auth everytime a request is made
             deck_id (int): id of the specific deck requested
 
+        Raises:
+            UnauthenticatedUserError,
+            NotAllowedError,
+            DoesNotExistError
+
         Returns:
-            [type]: [description]
+            json response
         """
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
@@ -375,8 +406,13 @@ class CardResource(Resource):
             api_key (string - 16 chars): used for user api auth everytime a request is made
             card_id (int): id of the specific card requested
 
+        Raises:
+            UnauthenticatedUserError,
+            NotAllowedError,
+            DoesNotExistError
+
         Returns:
-            [type]: [description]
+            json response
         """
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
@@ -406,8 +442,13 @@ class CardResource(Resource):
     def post(self):
         """Used to create a new card to be part of a deck created by user (CREATE)
 
+        Raises:
+            UnauthenticatedUserError,
+            NotAllowedError,
+            DoesNotExistError
+
         Returns:
-            [type]: [description]
+            json response
         """
         args = card_creation_parser.parse_args()
 
@@ -439,11 +480,11 @@ class CardResource(Resource):
 
         if not front:
             raise NotAllowedError(
-                    error_message='Front cannot be empty.')
+                error_message='Front cannot be empty.')
 
         if not back:
             raise NotAllowedError(
-                    error_message='Back cannot be empty.')
+                error_message='Back cannot be empty.')
 
         card = Card.query.filter((Card.deck_id == deck_id) & (
             (Card.front == front) | (Card.back == back))).first()
@@ -465,8 +506,13 @@ class CardResource(Resource):
     def put(self):
         """Used to update a particular card of a deck (UPDATE)
 
+        Raises:
+            UnauthenticatedUserError,
+            NotAllowedError,
+            DoesNotExistError
+
         Returns:
-            [type]: [description]
+            json response
         """
         args = card_updation_parser.parse_args()
 
@@ -535,8 +581,13 @@ class CardResource(Resource):
             deck_id (int): id of the specific deck requested
             card_id (int): id of the specific card requested
 
+        Raises:
+            UnauthenticatedUserError,
+            NotAllowedError,
+            DoesNotExistError
+
         Returns:
-            [type]: [description]
+            json response
         """
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
@@ -570,8 +621,11 @@ class PublicDecks(Resource):
             user_id (int): id of the user (used in the database)
             api_key (string - 16 chars): used for user api auth everytime a request is made
 
+        Raises:
+            UnauthenticatedUserError
+
         Returns:
-            [type]: [description]
+            json response
         """
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
@@ -607,8 +661,11 @@ class UserDeckScore(Resource):
             api_key (string - 16 chars): used for user api auth everytime a request is made
             deck_id (int): id of the specific deck requested
 
+        Raises:
+            UnauthenticatedUserError
+
         Returns:
-            [type]: [description]
+            json response
         """
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
@@ -643,8 +700,11 @@ class UserDeckAttempted(Resource):
             user_id (int): id of the user (used in the database)
             api_key (string - 16 chars): used for user api auth everytime a request is made
 
+        Raises:
+            UnauthenticatedUserError
+
         Returns:
-            [type]: [description]
+            json response
         """
 
         if not checkUserValid(user_id=user_id, api_key=api_key):
@@ -683,8 +743,12 @@ class StudyCard(Resource):
             deck_id (int): id of the specific deck requested
             card_id (int): id of the specific card requested
 
+        Raises:
+            UnauthenticatedUserError,
+            NotAllowedError
+
         Returns:
-            [type]: [description]
+            json response
         """
         if not checkUserValid(user_id=user_id, api_key=api_key):
             raise UnauthenticatedUserError(
@@ -709,8 +773,11 @@ class StudyCard(Resource):
     def post(self):
         """Add the feedback of a single card studied by the user
 
+        Raises:
+            UnauthenticatedUserError
+
         Returns:
-            [type]: [description]
+            json response
         """
         args = solving_deck_parser.parse_args()
 
@@ -780,8 +847,11 @@ class PublicDeckAuthorRelated(Resource):
             api_key (string - 16 chars): used for user api auth everytime a request is made
             author_name ([type]): name of the author/creator of the deck
 
+        Raises:
+            UnauthenticatedUserError
+
         Returns:
-            [type]: [description]
+            json response
         """
         if not checkUserValid(user_id=user_id, api_key=api_key):
             raise UnauthenticatedUserError(

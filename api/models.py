@@ -101,6 +101,7 @@ class PerCard(db.Model):
     percard_r = db.relationship("Card", backref=backref(
         "per_card", cascade="all,delete"))
 
+
 class Feedback(db.Model):
     __tablename__ = "feedback"
 
@@ -115,3 +116,4 @@ def create_departments(*args, **kwargs):
     db.session.add(Feedback(feedback_desc="Medium", score=1))
     db.session.add(Feedback(feedback_desc="Difficult", score=0))
     db.session.commit()
+# above method is used only when a new database file is generated and the feedback table as to be filled
