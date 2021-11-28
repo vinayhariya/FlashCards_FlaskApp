@@ -1517,4 +1517,18 @@ paths:
                       example: 401
                     error_message:
                       type: string
-                      example: "Invalid API User Credentials."                      
+                      example: "Invalid API User Credentials."
+          '404':
+            description: DoesNotExistError.
+            content:
+              application/json:
+                schema:
+                  title: error object
+                  type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      example: 404
+                    error_message:
+                      type: string
+                      example: "Author does not exist."

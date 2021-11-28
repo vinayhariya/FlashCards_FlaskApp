@@ -850,7 +850,16 @@ class PublicDeckAuthorRelated(Resource):
             raise UnauthenticatedUserError(
                 error_message="Invalid API User Credentials")
 
+        if isinstance(author_name, str):
+            author_name = author_name.strip().title()
+
+        if not author_name:
+            raise DoesNotExistError(error_message="Author does not exist.")
+
         author = User.query.filter(User.username == author_name).first()
+
+        if author is None:
+            raise DoesNotExistError(error_message="Author does not exist.")
 
         decks = Deck.query.filter(
             (Deck.author_id == author.user_id) & (Deck.public == True)).all()
