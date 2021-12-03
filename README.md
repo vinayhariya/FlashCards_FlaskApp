@@ -9,6 +9,9 @@ This website helps people study from virtual flash cards. They can create, study
 The website and API are accessible [here](https://flashcards.vinayhariya.repl.co/).
 (**Note**: If the repl is dormant, it may take upto a minute for it to start.)
 
+The website and API are accessible [here](https://flashcards-vinayhariya.glitch.me/).
+(**Note**: If the website is dormant, it may take upto 30 seconds for it to start.)
+
 <br>
 
 ## Features of the Website:

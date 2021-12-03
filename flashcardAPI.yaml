@@ -22,7 +22,9 @@ servers:
   - url: http://127.0.0.1:8000/
     description: Local Host Server (API Testing)
   - url: https://flashcards.vinayhariya.repl.co/
-    description: Production Server (Live API)
+    description: Production Replit Server (Live API)
+  - url: https://flashcards-vinayhariya.glitch.me/
+    description: Production Glitch Server (Live API)
 paths:
   /api/user/user_id={user_id}/get:
     get:
