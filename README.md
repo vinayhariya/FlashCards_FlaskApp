@@ -35,7 +35,7 @@ The website and API are accessible [here](https://flashcards-vinayhariya.glitch.
 
 1. On the localhost (local machine)
    
-   Follow the steps perfectly for successful installtion:
+   Follow the steps perfectly for successful installation:
 
    - Ensure python is installed on your system. (Version 3.9 and above)
    - Open the command promt (or equivalent) on the system.
